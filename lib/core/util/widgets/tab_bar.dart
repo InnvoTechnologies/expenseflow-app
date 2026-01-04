@@ -47,7 +47,7 @@ class _TabBarWidgetState extends State<TabBarWidget>
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 60,
+      height: 50,
       width: double.infinity,
       margin: const EdgeInsets.symmetric(horizontal: 5),
       decoration: BoxDecoration(
@@ -57,7 +57,7 @@ class _TabBarWidgetState extends State<TabBarWidget>
       child: TabBar(
         controller: _tabController,
         indicator: BoxDecoration(
-          color:  Theme.of(context).primaryColor,
+          color: Theme.of(context).primaryColor,
           borderRadius: BorderRadius.circular(5.0),
         ),
         labelColor: Colors.white,

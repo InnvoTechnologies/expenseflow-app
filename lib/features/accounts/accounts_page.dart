@@ -1,19 +1,30 @@
+import 'package:expenseflow/core/util/const/constants.dart';
+import 'package:expenseflow/core/util/widgets/app_bar.dart';
 import 'package:flutter/material.dart';
+
 import '../../core/data/dummy_data.dart';
+
 class AccountsPage extends StatefulWidget {
   const AccountsPage({super.key});
   @override
   State<AccountsPage> createState() => _AccountsPageState();
 }
+
 class _AccountsPageState extends State<AccountsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Accounts'), actions: [
-        IconButton(onPressed: () => _openAccountForm(), icon: const Icon(Icons.add)),
-      ]),
+      appBar: AppBarWidget(
+        title: 'Accounts',
+        actions: [
+          IconButton(
+            onPressed: () => _openAccountForm(),
+            icon: const Icon(Icons.add),
+          ),
+        ],
+      ),
       body: ListView.builder(
-        padding: const EdgeInsets.all(16),
+        padding: kDefaultPadding,
         itemCount: DummyData.accounts.length,
         itemBuilder: (context, i) {
           final a = DummyData.accounts[i];
@@ -30,20 +41,36 @@ class _AccountsPageState extends State<AccountsPage> {
       ),
     );
   }
+
   Future<void> _openAccountForm({int? existingIndex}) async {
     await showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       builder: (context) {
-        final controller = TextEditingController(text: existingIndex == null ? '' : DummyData.accounts[existingIndex].name);
+        final controller = TextEditingController(
+          text: existingIndex == null
+              ? ''
+              : DummyData.accounts[existingIndex].name,
+        );
         return Padding(
-          padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom, left: 16, right: 16, top: 16),
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+            left: 16,
+            right: 16,
+            top: 16,
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              TextField(decoration: const InputDecoration(labelText: 'Account Name'), controller: controller),
+              TextField(
+                decoration: const InputDecoration(labelText: 'Account Name'),
+                controller: controller,
+              ),
               const SizedBox(height: 12),
-              FilledButton(onPressed: () => Navigator.pop(context), child: const Text('Save')),
+              FilledButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Save'),
+              ),
               const SizedBox(height: 8),
             ],
           ),

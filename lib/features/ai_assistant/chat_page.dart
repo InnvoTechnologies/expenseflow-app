@@ -1,3 +1,4 @@
+import 'package:expenseflow/core/util/widgets/app_bar.dart';
 import 'package:flutter/material.dart';
 import '../../core/data/dummy_data.dart';
 import '../../domain/models/transaction.dart';
@@ -16,7 +17,7 @@ class _ChatPageState extends State<ChatPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('AI Assistant')),
+      appBar: AppBarWidget(title: 'AI Assistant'),
       body: Column(
         children: [
           Expanded(

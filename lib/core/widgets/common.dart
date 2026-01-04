@@ -33,17 +33,3 @@ class StatCard extends StatelessWidget {
     );
   }
 }
-class FilterTabs extends StatelessWidget {
-  final int index;
-  final List<String> labels;
-  final ValueChanged<int> onChanged;
-  const FilterTabs({super.key, required this.index, required this.labels, required this.onChanged});
-  @override
-  Widget build(BuildContext context) {
-    return SegmentedButton<int>(
-      segments: List.generate(labels.length, (i) => ButtonSegment<int>(value: i, label: Text(labels[i]))),
-      selected: {index},
-      onSelectionChanged: (s) => onChanged(s.first),
-    );
-  }
-}

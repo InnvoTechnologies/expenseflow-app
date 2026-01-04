@@ -1,9 +1,11 @@
+import 'package:expenseflow/core/util/const/constants.dart';
 import 'package:expenseflow/core/util/widgets/elevated_button.dart';
 import 'package:expenseflow/core/util/widgets/text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'forgot_password_page.dart';
+
 import '../shell/shell_page.dart';
+import 'forgot_password_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -15,9 +17,6 @@ class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
-  bool remember = false;
-  bool _obscurePassword = true;
-  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -28,13 +27,13 @@ class _LoginPageState extends State<LoginPage> {
 
   Future<void> _handleLogin() async {
     if (_formKey.currentState?.validate() ?? false) {
-      setState(() => _isLoading = true);
+      // setState(() => _isLoading = true);
 
       // Simulate API call
-      await Future.delayed(const Duration(seconds: 2));
+      // await Future.delayed(const Duration(seconds: 2));
 
       if (mounted) {
-        setState(() => _isLoading = false);
+        // setState(() => _isLoading = false);
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (context) => const ShellPage()),
         );
@@ -51,7 +50,7 @@ class _LoginPageState extends State<LoginPage> {
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
+            padding: kDefaultPadding,
             child: Form(
               key: _formKey,
               child: Column(
@@ -73,8 +72,7 @@ class _LoginPageState extends State<LoginPage> {
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 48),
-                 
-                 
+
                   CustomTextField(
                     hintText: 'Enter your email',
                     controller: emailController,
@@ -86,7 +84,7 @@ class _LoginPageState extends State<LoginPage> {
                     controller: passwordController,
                     label: 'Password',
                   ),
-                  
+
                   const SizedBox(height: 8),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,

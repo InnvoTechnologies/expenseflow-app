@@ -1,27 +1,29 @@
+import 'package:expenseflow/core/util/const/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
 import '../../core/theme/app_theme.dart';
 import '../../core/util/widgets/app_bar.dart';
 import '../accounts/accounts_page.dart';
-import '../categories/categories_page.dart';
-import '../payees/payees_page.dart';
 import '../ai_assistant/chat_page.dart';
-import '../recurring/reminders_page.dart';
-import '../recurring/subscriptions_page.dart';
-import '../organization/organization_page.dart';
-import '../profile/profile_page.dart';
-import '../profile/preferences_page.dart';
-import '../profile/security_page.dart';
-import '../profile/sessions_page.dart';
-import '../savings/savings_page.dart';
+import '../auth/forgot_password_page.dart';
+import '../auth/login_page.dart';
+import '../auth/verify_email_page.dart';
+import '../categories/categories_page.dart';
 import '../investments/investments_page.dart';
 import '../notifications/notifications_page.dart';
+import '../organization/organization_page.dart';
+import '../payees/payees_page.dart';
+import '../profile/preferences_page.dart';
+import '../profile/profile_page.dart';
+import '../profile/security_page.dart';
+import '../profile/sessions_page.dart';
+import '../recurring/reminders_page.dart';
+import '../recurring/subscriptions_page.dart';
+import '../savings/savings_page.dart';
 import '../static/about_page.dart';
 import '../static/help_page.dart';
 import '../static/privacy_page.dart';
-import '../auth/login_page.dart';
-import '../auth/forgot_password_page.dart';
-import '../auth/verify_email_page.dart';
 
 class MorePage extends StatelessWidget {
   const MorePage({super.key});
@@ -38,14 +40,22 @@ class MorePage extends StatelessWidget {
       _Item('Organization', Icons.business, () => const OrganizationPage()),
       _Item('Login', Icons.login, () => const LoginPage()),
       _Item('Forgot Password', Icons.refresh, () => const ForgotPasswordPage()),
-      _Item('Verify Email', Icons.mark_email_read, () => const VerifyEmailPage()),
+      _Item(
+        'Verify Email',
+        Icons.mark_email_read,
+        () => const VerifyEmailPage(),
+      ),
       _Item('Profile', Icons.person, () => const ProfilePage()),
       _Item('Preferences', Icons.tune, () => const PreferencesPage()),
       _Item('Security', Icons.lock, () => const SecurityPage()),
       _Item('Sessions', Icons.devices, () => const SessionsPage()),
       _Item('Savings', Icons.savings, () => const SavingsPage()),
       _Item('Investments', Icons.trending_up, () => const InvestmentsPage()),
-      _Item('Notifications', Icons.notifications, () => const NotificationsPage()),
+      _Item(
+        'Notifications',
+        Icons.notifications,
+        () => const NotificationsPage(),
+      ),
       _Item('About', Icons.info_outline, () => const AboutPage()),
       _Item('Help', Icons.help_outline, () => const HelpPage()),
       _Item('Privacy', Icons.privacy_tip_outlined, () => const PrivacyPage()),
@@ -58,10 +68,10 @@ class MorePage extends StatelessWidget {
           BlocBuilder<ThemeBloc, ThemeState>(
             builder: (context, state) {
               return Container(
-                margin: const EdgeInsets.all(16),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                margin: const EdgeInsets.all(8),
+                padding: kDefaultPadding,
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                  color: Theme.of(context).colorScheme.surface,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Row(
@@ -80,8 +90,8 @@ class MorePage extends StatelessWidget {
                     Text(
                       state.isDark ? 'Dark' : 'Light',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
-                          ),
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
                     ),
                     const SizedBox(width: 8),
                     Switch(
@@ -109,9 +119,9 @@ class MorePage extends StatelessWidget {
                 final it = items[i];
                 return Card(
                   child: InkWell(
-                    onTap: () => Navigator.of(context).push(
-                      MaterialPageRoute(builder: (_) => it.builder()),
-                    ),
+                    onTap: () => Navigator.of(
+                      context,
+                    ).push(MaterialPageRoute(builder: (_) => it.builder())),
                     child: Center(
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
@@ -132,6 +142,7 @@ class MorePage extends StatelessWidget {
     );
   }
 }
+
 class _Item {
   final String title;
   final IconData icon;
