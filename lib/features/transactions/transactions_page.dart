@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../core/data/dummy_data.dart';
+import '../../core/util/widgets/app_bar.dart';
 import '../../core/widgets/common.dart';
 import '../../domain/models/transaction.dart';
 import 'transaction_form_page.dart';
@@ -21,7 +22,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
       return t.type == TransactionType.transfer;
     }).toList();
     return Scaffold(
-      appBar: AppBar(title: const Text('Transactions'), actions: [
+      appBar: AppBarWidget(title: 'Transactions', actions: [
         IconButton(onPressed: () async {
           final created = await Navigator.of(context).push(MaterialPageRoute(builder: (_) => const TransactionFormPage()));
           if (created is Transaction) setState(() => items.insert(0, created));

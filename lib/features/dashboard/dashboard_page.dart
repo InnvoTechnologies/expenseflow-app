@@ -1,3 +1,4 @@
+import 'package:expenseflow/core/util/widgets/app_bar.dart';
 import 'package:flutter/material.dart';
 import '../../core/data/dummy_data.dart';
 import '../../domain/models/transaction.dart';
@@ -13,7 +14,7 @@ class _DashboardPageState extends State<DashboardPage> {
   Widget build(BuildContext context) {
     final totals = DummyData.monthlyTotals(month);
     return Scaffold(
-      appBar: AppBar(title: const Text('Dashboard')),
+      appBar: AppBarWidget(title:  'Dashboard'),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [

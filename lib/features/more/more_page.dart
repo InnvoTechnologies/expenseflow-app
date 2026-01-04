@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../core/theme/app_theme.dart';
+import '../../core/util/widgets/app_bar.dart';
 import '../accounts/accounts_page.dart';
 import '../categories/categories_page.dart';
 import '../payees/payees_page.dart';
@@ -17,11 +20,12 @@ import '../static/about_page.dart';
 import '../static/help_page.dart';
 import '../static/privacy_page.dart';
 import '../auth/login_page.dart';
-import '../auth/register_page.dart';
 import '../auth/forgot_password_page.dart';
 import '../auth/verify_email_page.dart';
+
 class MorePage extends StatelessWidget {
   const MorePage({super.key});
+
   @override
   Widget build(BuildContext context) {
     final items = [
@@ -33,7 +37,6 @@ class MorePage extends StatelessWidget {
       _Item('Subscriptions', Icons.repeat, () => const SubscriptionsPage()),
       _Item('Organization', Icons.business, () => const OrganizationPage()),
       _Item('Login', Icons.login, () => const LoginPage()),
-      _Item('Register', Icons.app_registration, () => const RegisterPage()),
       _Item('Forgot Password', Icons.refresh, () => const ForgotPasswordPage()),
       _Item('Verify Email', Icons.mark_email_read, () => const VerifyEmailPage()),
       _Item('Profile', Icons.person, () => const ProfilePage()),
@@ -47,30 +50,84 @@ class MorePage extends StatelessWidget {
       _Item('Help', Icons.help_outline, () => const HelpPage()),
       _Item('Privacy', Icons.privacy_tip_outlined, () => const PrivacyPage()),
     ];
+
     return Scaffold(
-      appBar: AppBar(title: const Text('More')),
-      body: GridView.builder(
-        padding: const EdgeInsets.all(16),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2, childAspectRatio: 1.6, crossAxisSpacing: 12, mainAxisSpacing: 12),
-        itemCount: items.length,
-        itemBuilder: (context, i) {
-          final it = items[i];
-          return Card(
-            child: InkWell(
-              onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => it.builder())),
-              child: Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
+      appBar: AppBarWidget(title: 'More'),
+      body: Column(
+        children: [
+          BlocBuilder<ThemeBloc, ThemeState>(
+            builder: (context, state) {
+              return Container(
+                margin: const EdgeInsets.all(16),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
                   children: [
-                    Icon(it.icon, size: 32),
-                    const SizedBox(height: 8),
-                    Text(it.title),
+                    Icon(
+                      state.isDark ? Icons.dark_mode : Icons.light_mode,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Text(
+                        'Theme',
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                    ),
+                    Text(
+                      state.isDark ? 'Dark' : 'Light',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
+                    ),
+                    const SizedBox(width: 8),
+                    Switch(
+                      value: state.isDark,
+                      onChanged: (value) {
+                        context.read<ThemeBloc>().add(const ToggleTheme());
+                      },
+                    ),
                   ],
                 ),
+              );
+            },
+          ),
+          Expanded(
+            child: GridView.builder(
+              padding: const EdgeInsets.fromLTRB(4, 0, 4, 4),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                childAspectRatio: 1.6,
+                // crossAxisSpacing: 4,
+                // mainAxisSpacing: 4,
               ),
+              itemCount: items.length,
+              itemBuilder: (context, i) {
+                final it = items[i];
+                return Card(
+                  child: InkWell(
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => it.builder()),
+                    ),
+                    child: Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(it.icon, size: 32),
+                          const SizedBox(height: 8),
+                          Text(it.title),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              },
             ),
-          );
-        },
+          ),
+        ],
       ),
     );
   }

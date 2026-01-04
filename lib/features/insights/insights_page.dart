@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:expenseflow/core/util/widgets/app_bar.dart';
 import 'package:flutter/material.dart';
 import '../../core/data/dummy_data.dart';
 class InsightsPage extends StatefulWidget {
@@ -13,7 +14,7 @@ class _InsightsPageState extends State<InsightsPage> {
     final yearly = DummyData.yearlyOverview(DateTime.now());
     final breakdown = DummyData.categoryBreakdown();
     return Scaffold(
-      appBar: AppBar(title: const Text('Insights')),
+      appBar: AppBarWidget(title: 'Insights'),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
