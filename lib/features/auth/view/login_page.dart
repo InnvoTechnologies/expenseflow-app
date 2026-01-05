@@ -4,7 +4,7 @@ import 'package:expenseflow/core/util/widgets/text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-import '../shell/shell_page.dart';
+import '../../shell/shell_page.dart';
 import 'forgot_password_page.dart';
 
 class LoginPage extends StatefulWidget {

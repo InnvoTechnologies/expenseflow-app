@@ -6,9 +6,6 @@ import '../../core/theme/app_theme.dart';
 import '../../core/util/widgets/app_bar.dart';
 import '../accounts/accounts_page.dart';
 import '../ai_assistant/chat_page.dart';
-import '../auth/forgot_password_page.dart';
-import '../auth/login_page.dart';
-import '../auth/verify_email_page.dart';
 import '../categories/categories_page.dart';
 import '../investments/investments_page.dart';
 import '../notifications/notifications_page.dart';
@@ -38,13 +35,6 @@ class MorePage extends StatelessWidget {
       _Item('Reminders', Icons.alarm, () => const RemindersPage()),
       _Item('Subscriptions', Icons.repeat, () => const SubscriptionsPage()),
       _Item('Organization', Icons.business, () => const OrganizationPage()),
-      _Item('Login', Icons.login, () => const LoginPage()),
-      _Item('Forgot Password', Icons.refresh, () => const ForgotPasswordPage()),
-      _Item(
-        'Verify Email',
-        Icons.mark_email_read,
-        () => const VerifyEmailPage(),
-      ),
       _Item('Profile', Icons.person, () => const ProfilePage()),
       _Item('Preferences', Icons.tune, () => const PreferencesPage()),
       _Item('Security', Icons.lock, () => const SecurityPage()),
@@ -118,6 +108,14 @@ class MorePage extends StatelessWidget {
               itemBuilder: (context, i) {
                 final it = items[i];
                 return Card(
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    side: BorderSide(
+                      color: Theme.of(context).colorScheme.outlineVariant,
+                      width: 1,
+                    ),
+                  ),
                   child: InkWell(
                     onTap: () => Navigator.of(
                       context,

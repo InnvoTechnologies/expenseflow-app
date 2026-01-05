@@ -12,7 +12,7 @@ class ForgotPasswordPage extends StatefulWidget {
 class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   final _formKey = GlobalKey<FormState>();
   final emailController = TextEditingController();
-  bool _isLoading = false;
+
   bool _emailSent = false;
 
   @override
@@ -23,14 +23,14 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
 
   Future<void> _handleResetPassword() async {
     if (_formKey.currentState?.validate() ?? false) {
-      setState(() => _isLoading = true);
+      // setState(() => _isLoading = true);
 
       // Simulate API call
       await Future.delayed(const Duration(seconds: 2));
 
       if (mounted) {
         setState(() {
-          _isLoading = false;
+          // _isLoading = false;
           _emailSent = true;
         });
       }
