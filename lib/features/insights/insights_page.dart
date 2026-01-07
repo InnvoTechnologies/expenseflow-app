@@ -12,7 +12,7 @@ class _InsightsPageState extends State<InsightsPage> {
   @override
   Widget build(BuildContext context) {
     final yearly = DummyData.yearlyOverview(DateTime.now());
-    final breakdown = DummyData.categoryBreakdown();
+    // final breakdown = DummyData.categoryBreakdown();
     return Scaffold(
       appBar: AppBarWidget(title: 'Insights'),
       body: ListView(
@@ -55,27 +55,27 @@ class _InsightsPageState extends State<InsightsPage> {
             height: 220,
             child: Row(
               children: [
-                Expanded(
-                  child: CustomPaint(
-                    painter: _DonutPainter(breakdown),
-                    child: Center(child: Text('\$${breakdown.values.fold<double>(0, (p, c) => p + c).toStringAsFixed(0)}')),
-                  ),
-                ),
+                // Expanded(
+                //   child: CustomPaint(
+                //     painter: _DonutPainter(breakdown),
+                //     child: Center(child: Text('\$${breakdown.values.fold<double>(0, (p, c) => p + c).toStringAsFixed(0)}')),
+                //   ),
+                // ),
                 const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    children: breakdown.entries.map((e) {
-                      return Row(
-                        children: [
-                          Container(width: 12, height: 12, color: _colorForKey(e.key)),
-                          const SizedBox(width: 8),
-                          Expanded(child: Text(e.key)),
-                          Text('\$${e.value.toStringAsFixed(0)}'),
-                        ],
-                      );
-                    }).toList(),
-                  ),
-                ),
+                // Expanded(
+                //   child: Column(
+                //     children: breakdown.entries.map((e) {
+                //       return Row(
+                //         children: [
+                //           Container(width: 12, height: 12, color: _colorForKey(e.key)),
+                //           const SizedBox(width: 8),
+                //           Expanded(child: Text(e.key)),
+                //           Text('\$${e.value.toStringAsFixed(0)}'),
+                //         ],
+                //       );
+                //     }).toList(),
+                //   ),
+                // ),
               ],
             ),
           ),

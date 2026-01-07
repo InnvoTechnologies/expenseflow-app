@@ -19,7 +19,7 @@ class CustomTextField extends StatefulWidget {
     this.color,
     this.style,
     this.label,
-    this.maxlines,
+    this.maxlines = 1,
     this.minlines,
     this.radius,
     this.autofocus = false,
@@ -62,7 +62,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
           (widget.label != null)
               ? Text(
                   widget.label ?? '',
-                  style: const TextStyle(fontSize: 14),
+                  style: Theme.of(context).textTheme.labelMedium,
                 )
               : const SizedBox.shrink(),
           TextFormField(
@@ -74,7 +74,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
             //   color: Colors.black,
             // ),
             enabled: widget.readOnly == true ? false : true,
-            style: Theme.of(context).textTheme.headlineSmall,
+            style: Theme.of(context).textTheme.bodyMedium,
             initialValue: widget.initialValue,
             controller: widget.controller,
             obscureText: hidePassword,
@@ -92,9 +92,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
                 right: 15,
               ),
               hintText: widget.hintText,
-              hintStyle:
-                  widget.style ??
-                  const TextStyle(fontSize: 12, color: Colors.grey),
+              hintStyle: widget.style ?? Theme.of(context).textTheme.bodyMedium,
               // border: InputBorder.none,
               border: const OutlineInputBorder(
                 borderRadius: BorderRadius.all(Radius.circular(10.0)),

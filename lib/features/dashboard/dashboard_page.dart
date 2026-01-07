@@ -1,5 +1,7 @@
 import 'package:expenseflow/core/util/const/constants.dart';
 import 'package:expenseflow/core/util/widgets/app_bar.dart';
+import 'package:expenseflow/features/accounts/accounts_page.dart';
+import 'package:expenseflow/features/payees/payees_page.dart';
 import 'package:flutter/material.dart';
 
 import '../../core/data/dummy_data.dart';
@@ -61,7 +63,7 @@ class _DashboardPageState extends State<DashboardPage> {
               _getGreeting(),
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.bold,
-                fontSize: 22,
+                fontSize: 20,
               ),
             ),
             SizedBox(height: 10),
@@ -121,13 +123,15 @@ class _DashboardPageState extends State<DashboardPage> {
               children: [
                 Text(
                   'Accounts',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 TextButton(
                   onPressed: () {
-                    // Navigate to accounts page
+                    Navigator.of(context).push(
+                      MaterialPageRoute(builder: (context) => AccountsPage()),
+                    );
                   },
                   child: const Text('View All'),
                 ),
@@ -163,9 +167,9 @@ class _DashboardPageState extends State<DashboardPage> {
               children: [
                 Text(
                   'Recent Transactions',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 IconButton(
                   onPressed: () {
@@ -205,10 +209,10 @@ class _DashboardPageState extends State<DashboardPage> {
                         ),
                       ]
                     : recentTransactions.map((transaction) {
-                        final category = DummyData.categories.firstWhere(
-                          (c) => c.id == transaction.categoryId,
-                          orElse: () => DummyData.categories.first,
-                        );
+                        // final category = DummyData.categories.firstWhere(
+                        //   (c) => c.id == transaction.categoryId,
+                        //   orElse: () => DummyData.categories.first,
+                        // );
                         final payee = transaction.payeeId != null
                             ? DummyData.payees.firstWhere(
                                 (p) => p.id == transaction.payeeId,
@@ -218,7 +222,7 @@ class _DashboardPageState extends State<DashboardPage> {
 
                         return TransactionItem(
                           transaction: transaction,
-                          category: category,
+                          // category: category,
                           payee: payee,
                           onTap: () {
                             // Navigate to transaction details
@@ -235,13 +239,15 @@ class _DashboardPageState extends State<DashboardPage> {
                 children: [
                   Text(
                     'Top Payees',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   TextButton(
                     onPressed: () {
-                      // Navigate to payees page
+                      Navigator.of(context).push(
+                        MaterialPageRoute(builder: (context) => PayeesPage()),
+                      );
                     },
                     child: const Text('View All'),
                   ),
@@ -466,6 +472,6 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   String _formatCurrency(double amount) {
-    return 'PKR\n${amount.toStringAsFixed(2).replaceAllMapped(RegExp(r'(\d)(?=(\d{3})+(?!\d))'), (match) => '${match[1]},')}';
+    return 'AUD\n${amount.toStringAsFixed(2).replaceAllMapped(RegExp(r'(\d)(?=(\d{3})+(?!\d))'), (match) => '${match[1]},')}';
   }
 }

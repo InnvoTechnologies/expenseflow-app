@@ -151,7 +151,11 @@ class NetworkClient {
   }
 
   // for HTTP.POST Request.
-  Future<Response> post(String url, dynamic params) async {
+  Future<Response> post(
+    String url,
+    dynamic params, {
+    Map<String, dynamic>? headers,
+  }) async {
     await _ensureInitialized();
     Response response;
     try {
@@ -161,6 +165,7 @@ class NetworkClient {
         options: Options(
           responseType: ResponseType.json,
           contentType: Headers.jsonContentType,
+          headers: headers,
         ),
       );
     } on DioException catch (exception) {

@@ -1,9 +1,6 @@
 import 'dart:math';
 
-import 'package:flutter/material.dart';
-
 import '../../domain/models/app_notification.dart';
-import '../../domain/models/category.dart';
 import '../../domain/models/finance_account.dart';
 import '../../domain/models/organization.dart';
 import '../../domain/models/payee.dart';
@@ -47,7 +44,7 @@ class DummyData {
       id: 'a1',
       name: 'Wise',
       type: FinanceAccountType.bank,
-      currency: 'PKR',
+      currency: 'AUD',
       currentBalance: 0.00,
       userId: 'u1',
     ),
@@ -55,7 +52,7 @@ class DummyData {
       id: 'a2',
       name: 'Nayapay',
       type: FinanceAccountType.bank,
-      currency: 'PKR',
+      currency: 'AUD',
       currentBalance: 407.99,
       userId: 'u1',
     ),
@@ -63,7 +60,7 @@ class DummyData {
       id: 'a3',
       name: 'EasyPaisa',
       type: FinanceAccountType.bank,
-      currency: 'PKR',
+      currency: 'AUD',
       currentBalance: 1153.00,
       userId: 'u1',
     ),
@@ -71,64 +68,8 @@ class DummyData {
       id: 'a4',
       name: 'Bank Alfalah',
       type: FinanceAccountType.bank,
-      currency: 'PKR',
+      currency: 'AUD',
       currentBalance: 11038.00,
-      userId: 'u1',
-    ),
-  ];
-  static final List<Category> categories = [
-    Category(
-      id: 'c_income',
-      name: 'Income',
-      type: CategoryType.income,
-      color: Colors.green.value,
-      userId: 'u1',
-    ),
-    Category(
-      id: 'c_salary',
-      name: 'Salary',
-      type: CategoryType.income,
-      color: Colors.green.shade700.value,
-      parentId: 'c_income',
-      userId: 'u1',
-    ),
-    Category(
-      id: 'c_bonus',
-      name: 'Bonus',
-      type: CategoryType.income,
-      color: Colors.green.shade400.value,
-      parentId: 'c_income',
-      userId: 'u1',
-    ),
-    Category(
-      id: 'c_expense',
-      name: 'Expense',
-      type: CategoryType.expense,
-      color: Colors.red.value,
-      userId: 'u1',
-    ),
-    Category(
-      id: 'c_groceries',
-      name: 'Groceries',
-      type: CategoryType.expense,
-      color: Colors.red.shade700.value,
-      parentId: 'c_expense',
-      userId: 'u1',
-    ),
-    Category(
-      id: 'c_rent',
-      name: 'Rent',
-      type: CategoryType.expense,
-      color: Colors.red.shade400.value,
-      parentId: 'c_expense',
-      userId: 'u1',
-    ),
-    Category(
-      id: 'c_transport',
-      name: 'Transport',
-      type: CategoryType.expense,
-      color: Colors.red.shade200.value,
-      parentId: 'c_expense',
       userId: 'u1',
     ),
   ];
@@ -356,16 +297,5 @@ class DummyData {
       data.add({'income': inc.toDouble(), 'expense': exp.toDouble()});
     }
     return data;
-  }
-
-  static Map<String, double> categoryBreakdown() {
-    final map = <String, double>{};
-    for (final t in transactions.where(
-      (t) => t.type == TransactionType.expense,
-    )) {
-      final name = categories.firstWhere((c) => c.id == t.categoryId).name;
-      map[name] = (map[name] ?? 0) + t.amount;
-    }
-    return map;
   }
 }

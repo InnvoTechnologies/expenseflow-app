@@ -68,7 +68,7 @@ class PayeeItem extends StatelessWidget {
   }
 
   String _formatAmount() {
-    return 'PKR ${totalAmount.toStringAsFixed(2).replaceAllMapped(
+    return 'AUD ${totalAmount.toStringAsFixed(2).replaceAllMapped(
           RegExp(r'(\d)(?=(\d{3})+(?!\d))'),
           (match) => '${match[1]},',
         )}';

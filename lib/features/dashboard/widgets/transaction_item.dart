@@ -1,18 +1,17 @@
 import 'package:flutter/material.dart';
 import '../../../domain/models/transaction.dart';
-import '../../../domain/models/category.dart';
 import '../../../domain/models/payee.dart';
 
 class TransactionItem extends StatelessWidget {
   final Transaction transaction;
-  final Category? category;
+  // final Category? category;
   final Payee? payee;
   final VoidCallback? onTap;
 
   const TransactionItem({
     super.key,
     required this.transaction,
-    this.category,
+    // this.category,
     this.payee,
     this.onTap,
   });
@@ -114,11 +113,11 @@ class TransactionItem extends StatelessWidget {
     parts.add(formattedDate);
 
     // Add category or payee info
-    if (category != null) {
-      parts.add(category!.name);
-    } else if (payee != null) {
-      parts.add(payee!.name);
-    }
+    // if (category != null) {
+    //   parts.add(category!.name);
+    // } else if (payee != null) {
+    //   parts.add(payee!.name);
+    // }
 
     return parts.join(' • ');
   }

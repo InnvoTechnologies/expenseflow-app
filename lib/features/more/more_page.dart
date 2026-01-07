@@ -6,7 +6,7 @@ import '../../core/theme/app_theme.dart';
 import '../../core/util/widgets/app_bar.dart';
 import '../accounts/accounts_page.dart';
 import '../ai_assistant/chat_page.dart';
-import '../categories/categories_page.dart';
+import '../categories/view/categories_page.dart';
 import '../investments/investments_page.dart';
 import '../notifications/notifications_page.dart';
 import '../organization/organization_page.dart';

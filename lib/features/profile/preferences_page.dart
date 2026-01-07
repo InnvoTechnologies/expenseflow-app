@@ -23,7 +23,7 @@ class _PreferencesPageState extends State<PreferencesPage> {
             items: const [
               DropdownMenuItem(value: 'USD', child: Text('USD')),
               DropdownMenuItem(value: 'EUR', child: Text('EUR')),
-              DropdownMenuItem(value: 'PKR', child: Text('PKR')),
+              DropdownMenuItem(value: 'AUD', child: Text('AUD')),
             ],
             onChanged: (v) => setState(() => currency = v!),
             decoration: const InputDecoration(labelText: 'Base Currency'),

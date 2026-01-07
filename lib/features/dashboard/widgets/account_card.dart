@@ -102,8 +102,8 @@ class AccountCard extends StatelessWidget {
         return '€';
       case 'GBP':
         return '£';
-      case 'PKR':
-        return 'PKR';
+      case 'AUD':
+        return 'AUD';
       case 'INR':
         return '₹';
       default:

@@ -73,7 +73,7 @@ class _ChatPageState extends State<ChatPage> {
       ),
     );
     if (confirmed == true) {
-      final t = Transaction(id: 'tx${DateTime.now().millisecondsSinceEpoch}', amount: 50.0, type: TransactionType.expense, date: DateTime.now(), description: 'Groceries', accountId: DummyData.accounts[1].id, toAccountId: null, categoryId: DummyData.categories.firstWhere((c) => c.name == 'Groceries').id, payeeId: DummyData.payees.first.id, status: 'POSTED');
+      // final t = Transaction(id: 'tx${DateTime.now().millisecondsSinceEpoch}', amount: 50.0, type: TransactionType.expense, date: DateTime.now(), description: 'Groceries', accountId: DummyData.accounts[1].id, toAccountId: null, categoryId: DummyData.categories.firstWhere((c) => c.name == 'Groceries').id, payeeId: DummyData.payees.first.id, status: 'POSTED');
       setState(() {
         messages.add({'role': 'assistant', 'text': 'Transaction created: \$50 Groceries'});
       });

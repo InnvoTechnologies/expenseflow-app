@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
-const String kBaseUrl = 'https://app.shift2go.io/api';
+const String kBaseUrl = 'https://app.expenseflow.co/api';
 const String kCdnUrl = '';
 
 EdgeInsets kDefaultPadding = EdgeInsets.symmetric(horizontal: 8);
