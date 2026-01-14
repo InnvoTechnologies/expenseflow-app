@@ -2,7 +2,6 @@ import 'dart:math';
 
 import '../../domain/models/app_notification.dart';
 import '../../domain/models/finance_account.dart';
-import '../../domain/models/organization.dart';
 import '../../domain/models/payee.dart';
 import '../../domain/models/reminder.dart';
 import '../../domain/models/savings_goal.dart';
@@ -198,40 +197,6 @@ class DummyData {
       categoryId: 'c_transport',
       status: 'ACTIVE',
       userId: 'u1',
-    ),
-  ];
-  static final List<Organization> organizations = [
-    Organization(
-      id: 'o1',
-      name: 'Personal',
-      slug: 'personal',
-      logo: null,
-      ownerUserId: 'u1',
-    ),
-    Organization(
-      id: 'o2',
-      name: 'Studio',
-      slug: 'studio',
-      logo: null,
-      ownerUserId: 'u1',
-    ),
-  ];
-  static final List<OrganizationMember> members = [
-    OrganizationMember(
-      id: 'm1',
-      userId: 'u1',
-      organizationId: 'o2',
-      role: 'Owner',
-      status: 'Active',
-      accountType: 'Admin',
-    ),
-    OrganizationMember(
-      id: 'm2',
-      userId: 'u1',
-      organizationId: 'o1',
-      role: 'Owner',
-      status: 'Active',
-      accountType: 'Personal',
     ),
   ];
   static final List<SavingsGoal> savings = [

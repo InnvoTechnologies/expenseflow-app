@@ -9,7 +9,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../core/util/loading/show_loading_spinner.dart';
-import '../../shell/shell_page.dart';
+import '../../organization/organization_page.dart';
 import '../bloc/auth_bloc.dart';
 import 'forgot_password_page.dart';
 
@@ -73,7 +73,7 @@ class _LoginPageState extends State<LoginPage> {
               }
             });
             Navigator.of(context).pushReplacement(
-              MaterialPageRoute(builder: (context) => const ShellPage()),
+              MaterialPageRoute(builder: (context) => const OrganizationPage()),
             );
           }
         },

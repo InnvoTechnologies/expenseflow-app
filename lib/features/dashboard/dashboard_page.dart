@@ -50,7 +50,6 @@ class _DashboardPageState extends State<DashboardPage> {
     return Scaffold(
       appBar: AppBarWidget(
         title: 'Dashboard',
-        isBack: false,
         // actions: [_buildMonthSelector()],
       ),
       body: SingleChildScrollView(

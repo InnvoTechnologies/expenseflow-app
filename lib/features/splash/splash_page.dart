@@ -1,6 +1,7 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'package:expenseflow/features/auth/bloc/auth_bloc.dart';
+import 'package:expenseflow/features/organization/organization_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -54,7 +55,7 @@ class _SplashPageState extends State<SplashPage>
     final authBloc = context.read<AuthBloc>();
     if (authBloc.state.token.isNotEmpty) {
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const ShellPage()),
+        MaterialPageRoute(builder: (context) => const OrganizationPage()),
       );
       return;
     }
