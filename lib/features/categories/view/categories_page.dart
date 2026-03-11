@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:expenseflow/core/util/widgets/app_bar.dart';
 import 'package:expenseflow/features/categories/cubit/category_cubit.dart';
 import 'package:flutter/material.dart';
@@ -5,6 +7,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../core/util/const/constants.dart';
 import '../../../core/util/loading/page_loading_spinner.dart';
+import '../../../core/util/loading/show_loading_spinner.dart';
+import '../../../core/util/widgets/dialogs.dart';
 import '../../../core/util/widgets/tab_bar.dart';
 import '../cubit/category_state.dart';
 import '../model/category_model.dart';
@@ -90,9 +94,18 @@ class _CategoriesPageState extends State<CategoriesPage> {
                           ),
                           title: Text(category.name),
                           subtitle: Text(category.type.name.toUpperCase()),
-                          trailing: IconButton(
-                            onPressed: () => _openCategoryForm(category),
-                            icon: const Icon(Icons.edit),
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                onPressed: () => _openCategoryForm(category),
+                                icon: const Icon(Icons.edit),
+                              ),
+                              IconButton(
+                                onPressed: () => _confirmDelete(category),
+                                icon: const Icon(Icons.delete_outline),
+                              ),
+                            ],
                           ),
                         ),
                       );
@@ -108,27 +121,74 @@ class _CategoriesPageState extends State<CategoriesPage> {
   }
 
   Future<void> _openCategoryForm(Category? c) async {
-    final nameController = TextEditingController(text: c?.name ?? '');
-    await showDialog(
+    final result = await showDialog<String>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(c == null ? 'New Category' : 'Edit Category'),
-        content: TextField(
-          controller: nameController,
-          decoration: const InputDecoration(labelText: 'Name'),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Save'),
-          ),
-        ],
+      builder: (context) => NameInputDialog(
+        title: c == null ? 'New Category' : 'Edit Category',
+        label: 'Name',
+        initialValue: c?.name ?? '',
       ),
     );
-    setState(() {});
+    if (result == null || result.isEmpty) return;
+
+    if (c == null) {
+      showLoadingSpinner(context);
+
+      final type = tab == 0 ? CategoryType.income : CategoryType.expense;
+      final success = await context.read<CategoryCubit>().createCategory(
+        name: result,
+        type: type,
+      );
+
+      Navigator.of(context).pop();
+
+      if (success) {
+        showSuccessSnackbar('Category created successfully');
+      } else {
+        showFailedSnackbar('Failed to create category');
+      }
+      return;
+    }
+
+    showLoadingSpinner(context);
+
+    final success = await context.read<CategoryCubit>().updateCategory(
+      category: c,
+      name: result,
+    );
+
+    Navigator.of(context).pop();
+
+    if (success) {
+      showSuccessSnackbar('Category updated successfully');
+    } else {
+      showFailedSnackbar('Failed to update category');
+    }
+  }
+
+  Future<void> _confirmDelete(Category category) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => ConfirmDeleteDialog(
+        title: 'Delete Category',
+        message: 'Are you sure you want to delete "${category.name}"?',
+      ),
+    );
+
+    if (confirmed != true) return;
+
+    showLoadingSpinner(context);
+
+    final success = await context.read<CategoryCubit>().deleteCategory(
+      category.id,
+    );
+
+    Navigator.of(context).pop();
+
+    if (success) {
+      showSuccessSnackbar('Category deleted successfully');
+    } else {
+      showFailedSnackbar('Failed to delete category');
+    }
   }
 }
