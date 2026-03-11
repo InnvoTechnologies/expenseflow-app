@@ -43,7 +43,7 @@ class _OrganizationPageState extends State<OrganizationPage> {
               },
               leading: const Icon(Icons.person),
               title: Text('Personal'),
-              subtitle: Text('o.slug'),
+              // subtitle: Text(''),
             ),
           ),
           const SizedBox(height: 8),

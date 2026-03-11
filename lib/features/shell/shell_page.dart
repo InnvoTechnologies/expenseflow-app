@@ -31,28 +31,27 @@ class _ShellPageState extends State<ShellPage> {
           const NavigationDestination(
             icon: Icon(Icons.dashboard_outlined),
             selectedIcon: Icon(Icons.dashboard, color: Colors.white),
-            label: 'Dashboard',
+            label: '',
           ),
           const NavigationDestination(
             icon: Icon(Icons.list_alt_outlined),
             selectedIcon: Icon(Icons.list_alt, color: Colors.white),
-            label: 'Transactions',
+            label: '',
           ),
           NavigationDestination(
             icon: const Icon(Icons.add_circle_outline),
             selectedIcon: const Icon(Icons.add_circle, color: Colors.white),
-            label: 'Add',
-            tooltip: 'Add Transaction',
+            label: '',
           ),
           const NavigationDestination(
             icon: Icon(Icons.stacked_bar_chart_outlined),
             selectedIcon: Icon(Icons.stacked_bar_chart, color: Colors.white),
-            label: 'Insights',
+            label: '',
           ),
           const NavigationDestination(
             icon: Icon(Icons.more_horiz),
             selectedIcon: Icon(Icons.more_horiz, color: Colors.white),
-            label: 'More',
+            label: '',
           ),
         ],
         indicatorColor: Theme.of(context).colorScheme.primary,

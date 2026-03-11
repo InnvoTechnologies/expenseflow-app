@@ -1,7 +1,9 @@
 import 'package:expenseflow/core/util/const/constants.dart';
 import 'package:expenseflow/core/util/widgets/app_bar.dart';
 import 'package:expenseflow/features/accounts/accounts_page.dart';
+import 'package:expenseflow/features/categories/view/categories_page.dart';
 import 'package:expenseflow/features/payees/payees_page.dart';
+import 'package:expenseflow/features/recurring/subscriptions_page.dart';
 import 'package:flutter/material.dart';
 
 import '../../core/data/dummy_data.dart';
@@ -46,6 +48,31 @@ class _DashboardPageState extends State<DashboardPage> {
     }
     final topPayees = payeeAmounts.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
+
+    final Map<String, double> incomeByCategory = {};
+    final Map<String, double> expenseByCategory = {};
+    for (final t in DummyData.transactions.where(
+      (t) =>
+          t.date.year == selectedDate.year &&
+          t.date.month == selectedDate.month,
+    )) {
+      if (t.categoryId == null) continue;
+      if (t.type == TransactionType.income) {
+        incomeByCategory[t.categoryId!] =
+            (incomeByCategory[t.categoryId!] ?? 0) + t.amount;
+      } else if (t.type == TransactionType.expense) {
+        expenseByCategory[t.categoryId!] =
+            (expenseByCategory[t.categoryId!] ?? 0) + t.amount;
+      }
+    }
+    final incomeEntries = incomeByCategory.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+    final expenseEntries = expenseByCategory.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+
+    final topTags = expenseEntries.take(5).toList();
+    final topSubscriptions = DummyData.subscriptions.toList()
+      ..sort((a, b) => b.amount.compareTo(a.amount));
 
     return Scaffold(
       appBar: AppBarWidget(
@@ -159,6 +186,56 @@ class _DashboardPageState extends State<DashboardPage> {
                 },
               ),
             ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Income by Category',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                _buildCategoryCard(
+                  context: context,
+                  entries: incomeEntries,
+                  valueColor: scheme.primary,
+                  action: TextButton(
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const CategoriesPage(),
+                        ),
+                      );
+                    },
+                    child: const Text('View All'),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'Expenses by Category',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                _buildCategoryCard(
+                  context: context,
+                  entries: expenseEntries,
+                  valueColor: scheme.error,
+                  action: TextButton(
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const CategoriesPage(),
+                        ),
+                      );
+                    },
+                    child: const Text('View All'),
+                  ),
+                ),
+              ],
+            ),
 
             // Recent Transactions Section
             Row(
@@ -230,6 +307,37 @@ class _DashboardPageState extends State<DashboardPage> {
                       }).toList(),
               ),
             ),
+            if (topTags.isNotEmpty)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Top Tags',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            if (topTags.isNotEmpty)
+              Card(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: BorderSide(color: scheme.outlineVariant, width: 1),
+                ),
+                child: Column(
+                  children: topTags.map((entry) {
+                    final name = _getCategoryName(entry.key);
+                    final color = _getCategoryColor(entry.key, scheme);
+                    return _BreakdownTile(
+                      label: name,
+                      amount: entry.value,
+                      color: color,
+                      valueColor: scheme.error,
+                    );
+                  }).toList(),
+                ),
+              ),
 
             // Top Payees Section
             if (topPayees.isNotEmpty)
@@ -272,6 +380,45 @@ class _DashboardPageState extends State<DashboardPage> {
                       onTap: () {
                         // Navigate to payee details
                       },
+                    );
+                  }).toList(),
+                ),
+              ),
+            if (topSubscriptions.isNotEmpty)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Top Subscriptions',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const SubscriptionsPage(),
+                        ),
+                      );
+                    },
+                    child: const Text('View All'),
+                  ),
+                ],
+              ),
+            if (topSubscriptions.isNotEmpty)
+              Card(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: BorderSide(color: scheme.outlineVariant, width: 1),
+                ),
+                child: Column(
+                  children: topSubscriptions.take(5).map((s) {
+                    return _BreakdownTile(
+                      label: s.title,
+                      amount: s.amount,
+                      color: scheme.primaryContainer,
+                      valueColor: scheme.error,
                     );
                   }).toList(),
                 ),
@@ -472,5 +619,111 @@ class _DashboardPageState extends State<DashboardPage> {
 
   String _formatCurrency(double amount) {
     return 'AUD\n${amount.toStringAsFixed(2).replaceAllMapped(RegExp(r'(\d)(?=(\d{3})+(?!\d))'), (match) => '${match[1]},')}';
+  }
+
+  Widget _buildCategoryCard({
+    required BuildContext context,
+    required List<MapEntry<String, double>> entries,
+    required Color valueColor,
+    Widget? action,
+  }) {
+    final scheme = Theme.of(context).colorScheme;
+    final total = entries.fold<double>(0, (p, e) => p + e.value);
+    return Card(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: scheme.outlineVariant, width: 1),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(8),
+        child: Column(
+          children: [
+            if (action != null)
+              Align(alignment: Alignment.topRight, child: action),
+            ...entries.take(5).map((e) {
+              final name = _getCategoryName(e.key);
+              final color = _getCategoryColor(e.key, scheme);
+              final pct = total == 0 ? 0.0 : e.value / total;
+              return _BreakdownTile(
+                label: name,
+                amount: e.value,
+                color: color,
+                valueColor: valueColor,
+                percent: pct,
+              );
+            }),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _getCategoryName(String id) {
+    switch (id) {
+      case 'c_rent':
+        return 'Housing & Utilities';
+      case 'c_transport':
+        return 'Travel';
+      case 'c_groceries':
+        return 'Groceries';
+      default:
+        return 'Other';
+    }
+  }
+
+  Color _getCategoryColor(String id, ColorScheme scheme) {
+    switch (id) {
+      case 'c_rent':
+        return Colors.orange;
+      case 'c_transport':
+        return Colors.blue;
+      case 'c_groceries':
+        return Colors.green;
+      default:
+        return scheme.primaryContainer;
+    }
+  }
+}
+
+class _BreakdownTile extends StatelessWidget {
+  final String label;
+  final double amount;
+  final Color color;
+  final Color valueColor;
+  final double? percent;
+  const _BreakdownTile({
+    required this.label,
+    required this.amount,
+    required this.color,
+    required this.valueColor,
+    this.percent,
+  });
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return ListTile(
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      leading: CircleAvatar(backgroundColor: color, radius: 14),
+      title: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label, maxLines: 1, overflow: TextOverflow.ellipsis),
+          const SizedBox(height: 6),
+          LinearProgressIndicator(
+            value: percent ?? 0,
+            minHeight: 6,
+            color: valueColor,
+            backgroundColor: scheme.surfaceContainerHighest,
+          ),
+        ],
+      ),
+      trailing: Text(
+        'AUD ${amount.toStringAsFixed(2).replaceAllMapped(RegExp(r'(\\d)(?=(\\d{3})+(?!\\d))'), (match) => '${match[1]},')}',
+        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+          fontWeight: FontWeight.w600,
+          color: valueColor,
+        ),
+      ),
+    );
   }
 }
