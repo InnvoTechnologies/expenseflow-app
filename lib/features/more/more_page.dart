@@ -10,6 +10,7 @@ import '../recurring/reminders_page.dart';
 import '../recurring/subscriptions_page.dart';
 import '../savings/savings_page.dart';
 import '../settings/settings_page.dart';
+import '../tags/view/tags_page.dart';
 
 class MorePage extends StatelessWidget {
   const MorePage({super.key});
@@ -19,6 +20,7 @@ class MorePage extends StatelessWidget {
     final items = [
       _Item('Accounts', Icons.account_balance, () => const AccountsPage()),
       _Item('Categories', Icons.category, () => const CategoriesPage()),
+      _Item('Tags', Icons.label_outline, () => const TagsPage()),
       _Item('Payees', Icons.person_outline, () => const PayeesPage()),
       _Item('AI Assistant', Icons.smart_toy_outlined, () => const ChatPage()),
       _Item('Reminders', Icons.alarm, () => const RemindersPage()),
