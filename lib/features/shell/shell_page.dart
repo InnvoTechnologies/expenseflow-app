@@ -22,10 +22,11 @@ class _ShellPageState extends State<ShellPage> {
   ];
   @override
   Widget build(BuildContext context) {
+    final navigationIndex = index >= 2 ? index + 1 : index;
     return Scaffold(
       body: IndexedStack(index: index, children: pages),
       bottomNavigationBar: NavigationBar(
-        selectedIndex: index,
+        selectedIndex: navigationIndex,
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         destinations: [
           const NavigationDestination(
