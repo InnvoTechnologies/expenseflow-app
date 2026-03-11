@@ -18,6 +18,12 @@ class ApiEndpoints {
   // ==================== Categories ====================
   static const String categories = '/categories';
 
+  // ==================== Tags ====================
+  static const String tags = '/tags';
+
+  // ==================== Payees ====================
+  static const String payees = '/payees';
+
   // ==================== User Profile ====================
   static const String updateProfile = '/user/update-profile';
   static const String userSessions = '/user/sessions';

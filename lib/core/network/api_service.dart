@@ -138,6 +138,180 @@ class ApiService {
     }
   }
 
+  ResultFuture<Response> getTags(Map<String, Object> params) async {
+    try {
+      final response = await _networkClient.get(
+        ApiEndpoints.tags,
+        params,
+      );
+      return Right(response);
+    } on AppException catch (e) {
+      return Left(ExceptionToFailureMapper.mapExceptionToFailure(e));
+    } catch (e) {
+      log('ApiService.getTags: Unexpected error - $e');
+      return Left(UnknownFailure(e.toString()));
+    }
+  }
+
+  ResultFuture<Response> createTag(Map<String, Object> params) async {
+    try {
+      final response = await _networkClient.post(
+        ApiEndpoints.tags,
+        params,
+      );
+      return Right(response);
+    } on AppException catch (e) {
+      return Left(ExceptionToFailureMapper.mapExceptionToFailure(e));
+    } catch (e) {
+      log('ApiService.createTag: Unexpected error - $e');
+      return Left(UnknownFailure(e.toString()));
+    }
+  }
+
+  ResultFuture<Response> updateTag(
+    String id,
+    Map<String, Object> params,
+  ) async {
+    try {
+      final response = await _networkClient.patch(
+        '${ApiEndpoints.tags}/$id',
+        params,
+      );
+      return Right(response);
+    } on AppException catch (e) {
+      return Left(ExceptionToFailureMapper.mapExceptionToFailure(e));
+    } catch (e) {
+      log('ApiService.updateTag: Unexpected error - $e');
+      return Left(UnknownFailure(e.toString()));
+    }
+  }
+
+  ResultFuture<Response> deleteTag(String id) async {
+    try {
+      final response = await _networkClient.delete(
+        '${ApiEndpoints.tags}/$id',
+        {},
+      );
+      return Right(response);
+    } on AppException catch (e) {
+      return Left(ExceptionToFailureMapper.mapExceptionToFailure(e));
+    } catch (e) {
+      log('ApiService.deleteTag: Unexpected error - $e');
+      return Left(UnknownFailure(e.toString()));
+    }
+  }
+
+  ResultFuture<Response> createCategory(Map<String, Object> params) async {
+    try {
+      final response = await _networkClient.post(
+        ApiEndpoints.categories,
+        params,
+      );
+      return Right(response);
+    } on AppException catch (e) {
+      return Left(ExceptionToFailureMapper.mapExceptionToFailure(e));
+    } catch (e) {
+      log('ApiService.createCategory: Unexpected error - $e');
+      return Left(UnknownFailure(e.toString()));
+    }
+  }
+
+  ResultFuture<Response> updateCategory(
+    String id,
+    Map<String, Object> params,
+  ) async {
+    try {
+      final response = await _networkClient.patch(
+        '${ApiEndpoints.categories}/$id',
+        params,
+      );
+      return Right(response);
+    } on AppException catch (e) {
+      return Left(ExceptionToFailureMapper.mapExceptionToFailure(e));
+    } catch (e) {
+      log('ApiService.updateCategory: Unexpected error - $e');
+      return Left(UnknownFailure(e.toString()));
+    }
+  }
+
+  ResultFuture<Response> deleteCategory(String id) async {
+    try {
+      final response = await _networkClient.delete(
+        '${ApiEndpoints.categories}/$id',
+        {},
+      );
+      return Right(response);
+    } on AppException catch (e) {
+      return Left(ExceptionToFailureMapper.mapExceptionToFailure(e));
+    } catch (e) {
+      log('ApiService.deleteCategory: Unexpected error - $e');
+      return Left(UnknownFailure(e.toString()));
+    }
+  }
+
+  ResultFuture<Response> getPayees(Map<String, Object> params) async {
+    try {
+      final response = await _networkClient.get(
+        ApiEndpoints.payees,
+        params,
+      );
+      return Right(response);
+    } on AppException catch (e) {
+      return Left(ExceptionToFailureMapper.mapExceptionToFailure(e));
+    } catch (e) {
+      log('ApiService.getPayees: Unexpected error - $e');
+      return Left(UnknownFailure(e.toString()));
+    }
+  }
+
+  ResultFuture<Response> createPayee(Map<String, Object> params) async {
+    try {
+      final response = await _networkClient.post(
+        ApiEndpoints.payees,
+        params,
+      );
+      return Right(response);
+    } on AppException catch (e) {
+      return Left(ExceptionToFailureMapper.mapExceptionToFailure(e));
+    } catch (e) {
+      log('ApiService.createPayee: Unexpected error - $e');
+      return Left(UnknownFailure(e.toString()));
+    }
+  }
+
+  ResultFuture<Response> updatePayee(
+    String id,
+    Map<String, Object> params,
+  ) async {
+    try {
+      final response = await _networkClient.patch(
+        '${ApiEndpoints.payees}/$id',
+        params,
+      );
+      return Right(response);
+    } on AppException catch (e) {
+      return Left(ExceptionToFailureMapper.mapExceptionToFailure(e));
+    } catch (e) {
+      log('ApiService.updatePayee: Unexpected error - $e');
+      return Left(UnknownFailure(e.toString()));
+    }
+  }
+
+  ResultFuture<Response> deletePayee(String id) async {
+    try {
+      final response = await _networkClient.delete(
+        '${ApiEndpoints.payees}/$id',
+        {},
+      );
+      return Right(response);
+    } on AppException catch (e) {
+      return Left(ExceptionToFailureMapper.mapExceptionToFailure(e));
+    } catch (e) {
+      log('ApiService.deletePayee: Unexpected error - $e');
+      return Left(UnknownFailure(e.toString()));
+    }
+  }
+
   ResultFuture<Response> revokeAllSessions() async {
     try {
       final response = await _networkClient.delete(
