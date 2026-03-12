@@ -1,7 +1,6 @@
 import 'package:expenseflow/features/categories/model/category_model.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../core/util/extensions.dart';
 import '../../../core/network/api_service.dart';
 import 'category_state.dart';
 
@@ -36,11 +35,12 @@ class CategoryCubit extends Cubit<CategoryState> {
   Future<bool> createCategory({
     required String name,
     required CategoryType type,
+    required String color,
   }) async {
     final params = <String, Object>{
       'name': name,
       'type': type == CategoryType.income ? 'INCOME' : 'EXPENSE',
-      'color': generateRandomColorHex(),
+      'color': color,
     };
 
     final result = await ApiService().createCategory(params);
@@ -69,11 +69,13 @@ class CategoryCubit extends Cubit<CategoryState> {
   Future<bool> updateCategory({
     required Category category,
     required String name,
+    required CategoryType type,
+    required String color,
   }) async {
     final params = <String, Object>{
       'name': name,
-      'type': category.type == CategoryType.income ? 'INCOME' : 'EXPENSE',
-      'color': category.color,
+      'type': type == CategoryType.income ? 'INCOME' : 'EXPENSE',
+      'color': color,
     };
 
     final result = await ApiService().updateCategory(category.id, params);

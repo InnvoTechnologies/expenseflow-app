@@ -24,4 +24,22 @@ abstract class Category with _$Category {
 
   factory Category.fromJson(Map<String, dynamic> json) =>
       _$CategoryFromJson(json);
+
+  static const List<String> availableColors = [
+    '#EF4444',
+    '#F97316',
+    '#F59E0B',
+    '#84CC16',
+    '#10B981',
+    '#06B6D4',
+    '#3B82F6',
+    '#6366F1',
+    '#8B5CF6',
+    '#D946EF',
+    '#EC4899',
+    '#64748B',
+    '#71717A',
+    '#737373',
+    '#78716C',
+  ];
 }
