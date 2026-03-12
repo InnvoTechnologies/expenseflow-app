@@ -1,7 +1,7 @@
-import 'package:expenseflow/domain/models/payee.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../core/network/api_service.dart';
+import '../model/payee_model.dart';
 import 'payee_state.dart';
 
 class PayeeCubit extends Cubit<PayeeState> {

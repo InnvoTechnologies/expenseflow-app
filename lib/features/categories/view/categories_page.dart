@@ -10,6 +10,7 @@ import '../../../core/util/loading/page_loading_spinner.dart';
 import '../../../core/util/loading/show_loading_spinner.dart';
 import '../../../core/util/widgets/dialogs.dart';
 import '../../../core/util/widgets/tab_bar.dart';
+import '../add_edit_category_page.dart';
 import '../cubit/category_state.dart';
 import '../model/category_model.dart';
 
@@ -34,7 +35,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
         title: 'Categories',
         actions: [
           IconButton(
-            onPressed: () => _openCategoryForm(null),
+            onPressed: () => _navigateToAddEdit(),
             icon: const Icon(Icons.add),
           ),
         ],
@@ -98,7 +99,8 @@ class _CategoriesPageState extends State<CategoriesPage> {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               IconButton(
-                                onPressed: () => _openCategoryForm(category),
+                                onPressed: () =>
+                                    _navigateToAddEdit(category: category),
                                 icon: const Icon(Icons.edit),
                               ),
                               IconButton(
@@ -120,50 +122,18 @@ class _CategoriesPageState extends State<CategoriesPage> {
     );
   }
 
-  Future<void> _openCategoryForm(Category? c) async {
-    final result = await showDialog<String>(
-      context: context,
-      builder: (context) => NameInputDialog(
-        title: c == null ? 'New Category' : 'Edit Category',
-        label: 'Name',
-        initialValue: c?.name ?? '',
+  void _navigateToAddEdit({Category? category}) {
+    final initialType = category?.type ??
+        (tab == 0 ? CategoryType.income : CategoryType.expense);
+
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => AddEditCategoryPage(
+          category: category,
+          initialType: initialType,
+        ),
       ),
     );
-    if (result == null || result.isEmpty) return;
-
-    if (c == null) {
-      showLoadingSpinner(context);
-
-      final type = tab == 0 ? CategoryType.income : CategoryType.expense;
-      final success = await context.read<CategoryCubit>().createCategory(
-        name: result,
-        type: type,
-      );
-
-      Navigator.of(context).pop();
-
-      if (success) {
-        showSuccessSnackbar('Category created successfully');
-      } else {
-        showFailedSnackbar('Failed to create category');
-      }
-      return;
-    }
-
-    showLoadingSpinner(context);
-
-    final success = await context.read<CategoryCubit>().updateCategory(
-      category: c,
-      name: result,
-    );
-
-    Navigator.of(context).pop();
-
-    if (success) {
-      showSuccessSnackbar('Category updated successfully');
-    } else {
-      showFailedSnackbar('Failed to update category');
-    }
   }
 
   Future<void> _confirmDelete(Category category) async {

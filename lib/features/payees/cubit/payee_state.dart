@@ -1,4 +1,4 @@
-import 'package:expenseflow/domain/models/payee.dart';
+import '../model/payee_model.dart';
 
 abstract class PayeeState {
   final List<Payee> payees;

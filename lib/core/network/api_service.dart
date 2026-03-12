@@ -28,6 +28,13 @@ class ApiService {
 
   Future<void> setSessionCookie(String sessionToken) async {
     await _networkClient.setCookie('better-auth.session_token', sessionToken);
+    log('Session cookie set: better-auth.session_token=$sessionToken');
+    try {
+      final cookies = await _networkClient.getCookies();
+      log('Current cookies: $cookies');
+    } catch (e) {
+      log('Failed to read cookies for logging: $e');
+    }
   }
 
   // Method to clear all cookies on logout
@@ -308,6 +315,21 @@ class ApiService {
       return Left(ExceptionToFailureMapper.mapExceptionToFailure(e));
     } catch (e) {
       log('ApiService.deletePayee: Unexpected error - $e');
+      return Left(UnknownFailure(e.toString()));
+    }
+  }
+
+  ResultFuture<Response> getDashboard(Map<String, Object> params) async {
+    try {
+      final response = await _networkClient.get(
+        ApiEndpoints.dashboard,
+        params,
+      );
+      return Right(response);
+    } on AppException catch (e) {
+      return Left(ExceptionToFailureMapper.mapExceptionToFailure(e));
+    } catch (e) {
+      log('ApiService.getDashboard: Unexpected error - $e');
       return Left(UnknownFailure(e.toString()));
     }
   }

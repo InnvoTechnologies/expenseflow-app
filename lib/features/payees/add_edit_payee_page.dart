@@ -9,8 +9,8 @@ import 'package:expenseflow/core/util/loading/show_loading_spinner.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../domain/models/payee.dart';
 import 'cubit/payee_cubit.dart';
+import 'model/payee_model.dart';
 
 class AddEditPayeePage extends StatefulWidget {
   const AddEditPayeePage({super.key, this.payee});
@@ -78,13 +78,13 @@ class _AddEditPayeePageState extends State<AddEditPayeePage> {
       }
       showLoadingSpinner(context);
       final success = await context.read<PayeeCubit>().updatePayee(
-            payee: widget.payee!,
-            name: name,
-            email: email.isEmpty ? null : email,
-            phone: phone.isEmpty ? null : phone,
-            address: address.isEmpty ? null : address,
-            description: description.isEmpty ? null : description,
-          );
+        payee: widget.payee!,
+        name: name,
+        email: email.isEmpty ? null : email,
+        phone: phone.isEmpty ? null : phone,
+        address: address.isEmpty ? null : address,
+        description: description.isEmpty ? null : description,
+      );
       Navigator.of(context).pop();
       if (success) {
         showSuccessSnackbar('Payee updated successfully');
@@ -95,12 +95,12 @@ class _AddEditPayeePageState extends State<AddEditPayeePage> {
     } else {
       showLoadingSpinner(context);
       final success = await context.read<PayeeCubit>().createPayee(
-            name: name,
-            email: email.isEmpty ? null : email,
-            phone: phone.isEmpty ? null : phone,
-            address: address.isEmpty ? null : address,
-            description: description.isEmpty ? null : description,
-          );
+        name: name,
+        email: email.isEmpty ? null : email,
+        phone: phone.isEmpty ? null : phone,
+        address: address.isEmpty ? null : address,
+        description: description.isEmpty ? null : description,
+      );
       Navigator.of(context).pop();
       if (success) {
         showSuccessSnackbar('Payee created successfully');
