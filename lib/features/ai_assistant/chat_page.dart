@@ -1,7 +1,5 @@
 import 'package:expenseflow/core/util/widgets/app_bar.dart';
 import 'package:flutter/material.dart';
-import '../../core/data/dummy_data.dart';
-import '../../domain/models/transaction.dart';
 class ChatPage extends StatefulWidget {
   const ChatPage({super.key});
   @override

@@ -24,6 +24,9 @@ class ApiEndpoints {
   // ==================== Payees ====================
   static const String payees = '/payees';
 
+  // ==================== Dashboard ====================
+  static const String dashboard = '/dashboard';
+
   // ==================== User Profile ====================
   static const String updateProfile = '/user/update-profile';
   static const String userSessions = '/user/sessions';
