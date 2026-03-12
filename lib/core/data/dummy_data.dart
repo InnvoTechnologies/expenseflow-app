@@ -2,13 +2,13 @@ import 'dart:math';
 
 import '../../domain/models/app_notification.dart';
 import '../../domain/models/finance_account.dart';
-import '../../domain/models/payee.dart';
 import '../../domain/models/reminder.dart';
 import '../../domain/models/savings_goal.dart';
 import '../../domain/models/session.dart';
 import '../../domain/models/subscription.dart';
 import '../../domain/models/transaction.dart';
 import '../../domain/models/user.dart';
+import '../../features/payees/model/payee_model.dart';
 
 class DummyData {
   static final User user = User(

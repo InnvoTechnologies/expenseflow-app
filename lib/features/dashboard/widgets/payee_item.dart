@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../domain/models/payee.dart';
+import '../../payees/model/payee_model.dart';
 
 class PayeeItem extends StatelessWidget {
   final Payee payee;

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+
 import '../../../domain/models/transaction.dart';
-import '../../../domain/models/payee.dart';
+import '../../payees/model/payee_model.dart';
 
 class TransactionItem extends StatelessWidget {
   final Transaction transaction;
@@ -38,24 +39,24 @@ class TransactionItem extends StatelessWidget {
       ),
       title: Text(
         transaction.description,
-        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-              fontWeight: FontWeight.w500,
-            ),
+        style: Theme.of(
+          context,
+        ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w500),
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
       ),
       subtitle: Text(
         _getSubtitle(),
-        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: scheme.onSurfaceVariant,
-            ),
+        style: Theme.of(
+          context,
+        ).textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
       ),
       trailing: Text(
         _formatAmount(),
         style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-              fontWeight: FontWeight.w600,
-              color: _getAmountColor(scheme),
-            ),
+          fontWeight: FontWeight.w600,
+          color: _getAmountColor(scheme),
+        ),
       ),
     );
   }
@@ -124,8 +125,18 @@ class TransactionItem extends StatelessWidget {
 
   String _getMonthName(int month) {
     const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
     ];
     return months[month - 1];
   }
@@ -134,12 +145,9 @@ class TransactionItem extends StatelessWidget {
     final prefix = transaction.type == TransactionType.income
         ? ''
         : transaction.type == TransactionType.expense
-            ? '-'
-            : '';
+        ? '-'
+        : '';
 
-    return '$prefix\$${transaction.amount.toStringAsFixed(2).replaceAllMapped(
-          RegExp(r'(\d)(?=(\d{3})+(?!\d))'),
-          (match) => '${match[1]},',
-        )}';
+    return '$prefix\$${transaction.amount.toStringAsFixed(2).replaceAllMapped(RegExp(r'(\d)(?=(\d{3})+(?!\d))'), (match) => '${match[1]},')}';
   }
 }
