@@ -8,10 +8,10 @@ import 'package:expenseflow/core/util/widgets/dialogs.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../domain/models/payee.dart';
 import 'add_edit_payee_page.dart';
 import 'cubit/payee_cubit.dart';
 import 'cubit/payee_state.dart';
+import 'model/payee_model.dart';
 
 class PayeesPage extends StatefulWidget {
   const PayeesPage({super.key});
