@@ -1,6 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'dashboard_model.freezed.dart';
+part 'dashboard_model.g.dart';
 
 @freezed
 abstract class DashboardAccount with _$DashboardAccount {
@@ -56,11 +57,9 @@ abstract class DashboardTransaction with _$DashboardTransaction {
 
     return DashboardTransaction(
       id: (json['id'] ?? '') as String,
-      description:
-          (json['description'] ?? json['name'] ?? '').toString(),
+      description: (json['description'] ?? json['name'] ?? '').toString(),
       amount: amount,
-      type: (json['type'] ?? json['transactionType'] ?? '')
-          .toString(),
+      type: (json['type'] ?? json['transactionType'] ?? '').toString(),
       date: parsedDate,
     );
   }
@@ -84,17 +83,12 @@ abstract class DashboardNamedAmount with _$DashboardNamedAmount {
         ? amountRaw.toDouble()
         : double.tryParse(amountRaw.toString()) ?? 0.0;
 
-    final name =
-        (json['name'] ?? json['title'] ?? json['label'] ?? 'Unknown')
-            .toString();
+    final name = (json['name'] ?? json['title'] ?? json['label'] ?? 'Unknown')
+        .toString();
 
     final color = json['color'] as String?;
 
-    return DashboardNamedAmount(
-      name: name,
-      amount: amount,
-      color: color,
-    );
+    return DashboardNamedAmount(name: name, amount: amount, color: color);
   }
 }
 
@@ -119,32 +113,22 @@ abstract class DashboardData with _$DashboardData {
   factory DashboardData.fromApiJson(Map<String, dynamic> json) {
     final totalBalance = (json['totalBalance'] as num?)?.toDouble() ?? 0.0;
     final monthlyIncome = (json['monthlyIncome'] as num?)?.toDouble() ?? 0.0;
-    final monthlyExpense =
-        (json['monthlyExpense'] as num?)?.toDouble() ?? 0.0;
+    final monthlyExpense = (json['monthlyExpense'] as num?)?.toDouble() ?? 0.0;
 
     final accountsJson = json['accounts'] as List<dynamic>? ?? [];
     final accounts = accountsJson
-        .map((a) => DashboardAccount.fromJson(
-              a as Map<String, dynamic>,
-            ))
+        .map((a) => DashboardAccount.fromJson(a as Map<String, dynamic>))
         .toList();
 
-    final recentTxJson =
-        json['recentTransactions'] as List<dynamic>? ?? [];
+    final recentTxJson = json['recentTransactions'] as List<dynamic>? ?? [];
     final recentTransactions = recentTxJson
-        .map((t) => DashboardTransaction.fromJson(
-              t as Map<String, dynamic>,
-            ))
+        .map((t) => DashboardTransaction.fromJson(t as Map<String, dynamic>))
         .toList();
 
     List<DashboardNamedAmount> parseNamedList(String key) {
       final raw = json[key] as List<dynamic>? ?? [];
       return raw
-          .map(
-            (e) => DashboardNamedAmount.fromJson(
-              e as Map<String, dynamic>,
-            ),
-          )
+          .map((e) => DashboardNamedAmount.fromJson(e as Map<String, dynamic>))
           .toList();
     }
 
@@ -168,4 +152,3 @@ abstract class DashboardData with _$DashboardData {
     );
   }
 }
-

@@ -6,6 +6,7 @@ import 'package:expenseflow/features/accounts/accounts_page.dart';
 import 'package:expenseflow/features/categories/view/categories_page.dart';
 import 'package:expenseflow/features/payees/payees_page.dart';
 import 'package:expenseflow/features/recurring/subscriptions_page.dart';
+import 'package:expenseflow/features/tags/view/tags_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -182,50 +183,58 @@ class _DashboardPageState extends State<DashboardPage> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'Income by Category',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Income by Category',
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(fontWeight: FontWeight.bold),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => const CategoriesPage(),
+                              ),
+                            );
+                          },
+                          child: const Text('View All'),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 8),
                     _buildCategoryCard(
                       context: context,
                       entries: data?.incomeByCategory ?? const [],
                       valueColor: scheme.primary,
-                      action: TextButton(
-                        onPressed: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => const CategoriesPage(),
-                            ),
-                          );
-                        },
-                        child: const Text('View All'),
-                      ),
                     ),
                     const SizedBox(height: 12),
-                    Text(
-                      'Expenses by Category',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Expenses by Category',
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(fontWeight: FontWeight.bold),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => const CategoriesPage(),
+                              ),
+                            );
+                          },
+                          child: const Text('View All'),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 8),
                     _buildCategoryCard(
                       context: context,
                       entries: data?.expensesByCategory ?? const [],
                       valueColor: scheme.error,
-                      action: TextButton(
-                        onPressed: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => const CategoriesPage(),
-                            ),
-                          );
-                        },
-                        child: const Text('View All'),
-                      ),
                     ),
                   ],
                 ),
@@ -262,7 +271,7 @@ class _DashboardPageState extends State<DashboardPage> {
                         ),
                       ),
                       child: Column(
-                      children: (data?.recentTransactions.isEmpty ?? true)
+                        children: (data?.recentTransactions.isEmpty ?? true)
                             ? [
                                 Padding(
                                   padding: const EdgeInsets.all(32),
@@ -292,8 +301,8 @@ class _DashboardPageState extends State<DashboardPage> {
                                 final type = t.type == 'INCOME'
                                     ? domain.TransactionType.income
                                     : t.type == 'EXPENSE'
-                                        ? domain.TransactionType.expense
-                                        : domain.TransactionType.transfer;
+                                    ? domain.TransactionType.expense
+                                    : domain.TransactionType.transfer;
 
                                 final transaction = domain.Transaction(
                                   id: t.id,
@@ -330,6 +339,16 @@ class _DashboardPageState extends State<DashboardPage> {
                         'Top Tags',
                         style: Theme.of(context).textTheme.titleMedium
                             ?.copyWith(fontWeight: FontWeight.bold),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => const TagsPage(),
+                            ),
+                          );
+                        },
+                        child: const Text('View All'),
                       ),
                     ],
                   ),
