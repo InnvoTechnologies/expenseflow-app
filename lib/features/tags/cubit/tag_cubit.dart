@@ -1,7 +1,6 @@
 import 'package:expenseflow/features/tags/model/tag_model.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../core/util/extensions.dart';
 import '../../../core/network/api_service.dart';
 import 'tag_state.dart';
 
@@ -33,11 +32,11 @@ class TagCubit extends Cubit<TagState> {
     );
   }
 
-  Future<bool> createTag({required String name}) async {
-    final params = <String, Object>{
-      'name': name,
-      'color': generateRandomColorHex(),
-    };
+  Future<bool> createTag({
+    required String name,
+    required String color,
+  }) async {
+    final params = <String, Object>{'name': name, 'color': color};
 
     final result = await ApiService().createTag(params);
 
@@ -59,8 +58,12 @@ class TagCubit extends Cubit<TagState> {
     );
   }
 
-  Future<bool> updateTag({required Tag tag, required String name}) async {
-    final params = <String, Object>{'name': name, 'color': tag.color};
+  Future<bool> updateTag({
+    required Tag tag,
+    required String name,
+    required String color,
+  }) async {
+    final params = <String, Object>{'name': name, 'color': color};
 
     final result = await ApiService().updateTag(tag.id, params);
 

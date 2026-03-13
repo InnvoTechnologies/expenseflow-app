@@ -11,6 +11,7 @@ import '../../../core/util/loading/show_loading_spinner.dart';
 import '../../../core/util/widgets/dialogs.dart';
 import '../cubit/tag_state.dart';
 import '../model/tag_model.dart';
+import '../add_edit_tag_page.dart';
 
 class TagsPage extends StatefulWidget {
   const TagsPage({super.key});
@@ -33,7 +34,7 @@ class _TagsPageState extends State<TagsPage> {
         title: 'Tags',
         actions: [
           IconButton(
-            onPressed: () => _openTagForm(null),
+            onPressed: () => _navigateToAddEdit(),
             icon: const Icon(Icons.add),
           ),
         ],
@@ -70,7 +71,7 @@ class _TagsPageState extends State<TagsPage> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         IconButton(
-                          onPressed: () => _openTagForm(tag),
+                          onPressed: () => _navigateToAddEdit(tag: tag),
                           icon: const Icon(Icons.edit),
                         ),
                         IconButton(
@@ -89,46 +90,12 @@ class _TagsPageState extends State<TagsPage> {
     );
   }
 
-  Future<void> _openTagForm(Tag? tag) async {
-    final result = await showDialog<String>(
-      context: context,
-      builder: (context) => NameInputDialog(
-        title: tag == null ? 'New Tag' : 'Edit Tag',
-        label: 'Name',
-        initialValue: tag?.name ?? '',
+  void _navigateToAddEdit({Tag? tag}) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => AddEditTagPage(tag: tag),
       ),
     );
-
-    if (result == null || result.isEmpty) return;
-
-    if (tag == null) {
-      showLoadingSpinner(context);
-
-      final success = await context.read<TagCubit>().createTag(name: result);
-
-      Navigator.of(context).pop();
-      if (success) {
-        showSuccessSnackbar('Tag created successfully');
-      } else {
-        showFailedSnackbar('Failed to create tag');
-      }
-      return;
-    }
-
-    showLoadingSpinner(context);
-
-    final success = await context.read<TagCubit>().updateTag(
-      tag: tag,
-      name: result,
-    );
-
-    Navigator.of(context).pop();
-
-    if (success) {
-      showSuccessSnackbar('Tag updated successfully');
-    } else {
-      showFailedSnackbar('Failed to update tag');
-    }
   }
 
   Future<void> _confirmDelete(Tag tag) async {
