@@ -21,6 +21,12 @@ class ApiEndpoints {
   // ==================== Tags ====================
   static const String tags = '/tags';
 
+  // ==================== Accounts ====================
+  static const String accounts = '/accounts';
+
+  // ==================== Subscriptions ====================
+  static const String subscriptions = '/subscriptions';
+
   // ==================== Payees ====================
   static const String payees = '/payees';
 

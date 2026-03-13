@@ -5,7 +5,6 @@ import '../../domain/models/finance_account.dart';
 import '../../domain/models/reminder.dart';
 import '../../domain/models/savings_goal.dart';
 import '../../domain/models/session.dart';
-import '../../domain/models/subscription.dart';
 import '../../domain/models/transaction.dart';
 import '../../domain/models/user.dart';
 import '../../features/payees/model/payee_model.dart';
@@ -170,32 +169,6 @@ class DummyData {
       description: null,
       dueDate: DateTime.now().subtract(const Duration(days: 2)),
       status: ReminderStatus.completed,
-      userId: 'u1',
-    ),
-  ];
-  static final List<Subscription> subscriptions = [
-    Subscription(
-      id: 's1',
-      title: 'Netflix',
-      amount: 15.99,
-      billingCycle: BillingCycle.monthly,
-      startDate: DateTime(2023, 1, 1),
-      nextBillingDate: DateTime.now().add(const Duration(days: 12)),
-      accountId: 'a3',
-      categoryId: 'c_transport',
-      status: 'ACTIVE',
-      userId: 'u1',
-    ),
-    Subscription(
-      id: 's2',
-      title: 'Spotify',
-      amount: 9.99,
-      billingCycle: BillingCycle.monthly,
-      startDate: DateTime(2023, 2, 1),
-      nextBillingDate: DateTime.now().add(const Duration(days: 3)),
-      accountId: 'a3',
-      categoryId: 'c_transport',
-      status: 'ACTIVE',
       userId: 'u1',
     ),
   ];
