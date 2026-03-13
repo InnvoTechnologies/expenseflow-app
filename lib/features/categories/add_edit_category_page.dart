@@ -213,13 +213,21 @@ class _AddEditCategoryPageState extends State<AddEditCategoryPage> {
                   }).toList(),
                 ),
                 const SizedBox(height: 32),
-                CustomElevatedButton(
-                  text: _isEdit ? 'Edit' : 'Save',
-                  onPressed: _submit,
-                ),
-                const SizedBox(height: 24),
               ],
             ),
+          ),
+        ),
+      ),
+      bottomNavigationBar: SafeArea(
+        top: false,
+        child: Padding(
+          padding: kDefaultPadding.copyWith(
+            top: 12,
+            bottom: 12,
+          ),
+          child: CustomElevatedButton(
+            text: _isEdit ? 'Edit' : 'Save',
+            onPressed: _submit,
           ),
         ),
       ),
