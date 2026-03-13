@@ -28,4 +28,15 @@ class Validators {
     }
     return null;
   }
+
+  static String? positiveAmount(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Amount must be greater than 0';
+    }
+    final parsed = double.tryParse(value.trim());
+    if (parsed == null || parsed <= 0) {
+      return 'Amount must be greater than 0';
+    }
+    return null;
+  }
 }
