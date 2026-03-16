@@ -6,47 +6,39 @@ import 'package:expenseflow/core/util/validators.dart';
 import 'package:expenseflow/core/util/widgets/app_bar.dart';
 import 'package:expenseflow/core/util/widgets/elevated_button.dart';
 import 'package:expenseflow/core/util/widgets/text_field.dart';
+import 'package:expenseflow/features/categories/model/category_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../features/categories/cubit/category_cubit.dart';
-import '../../features/categories/model/category_model.dart';
+import 'cubit/tag_cubit.dart';
+import 'model/tag_model.dart';
 
-class AddEditCategoryPage extends StatefulWidget {
-  const AddEditCategoryPage({
+class AddEditTagPage extends StatefulWidget {
+  const AddEditTagPage({
     super.key,
-    this.category,
-    required this.initialType,
+    this.tag,
   });
 
-  final Category? category;
-  final CategoryType initialType;
+  final Tag? tag;
 
   @override
-  State<AddEditCategoryPage> createState() => _AddEditCategoryPageState();
+  State<AddEditTagPage> createState() => _AddEditTagPageState();
 }
 
-class _AddEditCategoryPageState extends State<AddEditCategoryPage> {
+class _AddEditTagPageState extends State<AddEditTagPage> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _nameController;
-  late int _selectedTypeIndex;
   late String _selectedColor;
 
-  bool get _isEdit => widget.category != null;
-
-  CategoryType get _currentType =>
-      _selectedTypeIndex == 0 ? CategoryType.income : CategoryType.expense;
+  bool get _isEdit => widget.tag != null;
 
   @override
   void initState() {
     super.initState();
-    final c = widget.category;
-    _nameController = TextEditingController(text: c?.name ?? '');
-    _selectedTypeIndex = (c?.type ?? widget.initialType) == CategoryType.income
-        ? 0
-        : 1;
+    final t = widget.tag;
+    _nameController = TextEditingController(text: t?.name ?? '');
 
-    final existingColor = c?.color;
+    final existingColor = t?.color;
     if (existingColor != null &&
         Category.availableColors.contains(existingColor)) {
       _selectedColor = existingColor;
@@ -62,10 +54,8 @@ class _AddEditCategoryPageState extends State<AddEditCategoryPage> {
   }
 
   bool _hasDataChanged() {
-    final c = widget.category!;
-    return _nameController.text.trim() != c.name ||
-        _currentType != c.type ||
-        _selectedColor != c.color;
+    final t = widget.tag!;
+    return _nameController.text.trim() != t.name || _selectedColor != t.color;
   }
 
   Future<void> _submit() async {
@@ -73,7 +63,6 @@ class _AddEditCategoryPageState extends State<AddEditCategoryPage> {
     FocusScope.of(context).unfocus();
 
     final name = _nameController.text.trim();
-    final type = _currentType;
     final color = _selectedColor;
 
     if (_isEdit) {
@@ -81,33 +70,34 @@ class _AddEditCategoryPageState extends State<AddEditCategoryPage> {
         Navigator.of(context).pop();
         return;
       }
+
       showLoadingSpinner(context);
-      final success = await context.read<CategoryCubit>().updateCategory(
-        category: widget.category!,
-        name: name,
-        type: type,
-        color: color,
-      );
+      final success = await context.read<TagCubit>().updateTag(
+            tag: widget.tag!,
+            name: name,
+            color: color,
+          );
       Navigator.of(context).pop();
+
       if (success) {
-        showSuccessSnackbar('Category updated successfully');
+        showSuccessSnackbar('Tag updated successfully');
         Navigator.of(context).pop();
       } else {
-        showFailedSnackbar('Failed to update category');
+        showFailedSnackbar('Failed to update tag');
       }
     } else {
       showLoadingSpinner(context);
-      final success = await context.read<CategoryCubit>().createCategory(
-        name: name,
-        type: type,
-        color: color,
-      );
+      final success = await context.read<TagCubit>().createTag(
+            name: name,
+            color: color,
+          );
       Navigator.of(context).pop();
+
       if (success) {
-        showSuccessSnackbar('Category created successfully');
+        showSuccessSnackbar('Tag created successfully');
         Navigator.of(context).pop();
       } else {
-        showFailedSnackbar('Failed to create category');
+        showFailedSnackbar('Failed to create tag');
       }
     }
   }
@@ -118,7 +108,7 @@ class _AddEditCategoryPageState extends State<AddEditCategoryPage> {
 
     return Scaffold(
       appBar: AppBarWidget(
-        title: _isEdit ? 'Edit Category' : 'New Category',
+        title: _isEdit ? 'Edit Tag' : 'New Tag',
         isBack: true,
       ),
       body: SafeArea(
@@ -135,47 +125,6 @@ class _AddEditCategoryPageState extends State<AddEditCategoryPage> {
                   hintText: 'Name',
                   label: 'Name',
                   validator: Validators.required,
-                ),
-                const SizedBox(height: 24),
-                Text('Type', style: theme.textTheme.labelMedium),
-                const SizedBox(height: 8),
-                SizedBox(
-                  width: double.infinity,
-                  child: LayoutBuilder(
-                    builder: (context, constraints) {
-                      final buttonWidth = (constraints.maxWidth - 8) / 2;
-                      return ToggleButtons(
-                        isSelected: [
-                          _selectedTypeIndex == 0,
-                          _selectedTypeIndex == 1,
-                        ],
-                        onPressed: (index) {
-                          setState(() {
-                            _selectedTypeIndex = index;
-                          });
-                        },
-                        borderRadius: BorderRadius.circular(12),
-                        constraints: BoxConstraints(
-                          minHeight: 34,
-                          minWidth: buttonWidth,
-                        ),
-                        children: const [
-                          Padding(
-                            padding: EdgeInsets.symmetric(
-                              vertical: 6,
-                            ),
-                            child: Center(child: Text('INCOME')),
-                          ),
-                          Padding(
-                            padding: EdgeInsets.symmetric(
-                              vertical: 6,
-                            ),
-                            child: Center(child: Text('EXPENSE')),
-                          ),
-                        ],
-                      );
-                    },
-                  ),
                 ),
                 const SizedBox(height: 24),
                 Text('Color', style: theme.textTheme.labelMedium),
@@ -234,3 +183,4 @@ class _AddEditCategoryPageState extends State<AddEditCategoryPage> {
     );
   }
 }
+

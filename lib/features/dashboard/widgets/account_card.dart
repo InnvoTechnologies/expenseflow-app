@@ -1,3 +1,4 @@
+import 'package:expenseflow/core/util/extensions.dart';
 import 'package:flutter/material.dart';
 import '../../../domain/models/finance_account.dart';
 
@@ -58,7 +59,7 @@ class AccountCard extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               Text(
-                _formatCurrency(account.currentBalance, account.currency),
+                formatCurrency(account.currentBalance, account.currency),
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: account.currentBalance < 0
@@ -83,31 +84,6 @@ class AccountCard extends StatelessWidget {
         return 'Card';
       case FinanceAccountType.wallet:
         return 'Wallet';
-    }
-  }
-
-  String _formatCurrency(double amount, String currency) {
-    final symbol = _getCurrencySymbol(currency);
-    return '$symbol ${amount.toStringAsFixed(2).replaceAllMapped(
-          RegExp(r'(\d)(?=(\d{3})+(?!\d))'),
-          (match) => '${match[1]},',
-        )}';
-  }
-
-  String _getCurrencySymbol(String currency) {
-    switch (currency.toUpperCase()) {
-      case 'USD':
-        return '\$';
-      case 'EUR':
-        return '€';
-      case 'GBP':
-        return '£';
-      case 'AUD':
-        return 'AUD';
-      case 'INR':
-        return '₹';
-      default:
-        return currency;
     }
   }
 }

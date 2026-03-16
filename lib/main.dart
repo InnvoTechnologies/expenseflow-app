@@ -7,6 +7,8 @@ import 'package:path_provider/path_provider.dart';
 import 'core/network/api_service.dart';
 import 'core/theme/app_theme.dart';
 import 'features/categories/cubit/category_cubit.dart';
+import 'features/accounts/cubit/account_cubit.dart';
+import 'features/recurring/cubit/subscription_cubit.dart';
 import 'features/dashboard/cubit/dashboard_cubit.dart';
 import 'features/payees/cubit/payee_cubit.dart';
 import 'features/tags/cubit/tag_cubit.dart';
@@ -35,6 +37,10 @@ class ExpenseFlowApp extends StatelessWidget {
         BlocProvider<ThemeBloc>(create: (context) => ThemeBloc()),
         BlocProvider<AuthBloc>(create: (context) => AuthBloc()),
         BlocProvider<CategoryCubit>(create: (context) => CategoryCubit()),
+        BlocProvider<AccountCubit>(create: (context) => AccountCubit()),
+        BlocProvider<SubscriptionCubit>(
+          create: (context) => SubscriptionCubit(),
+        ),
         BlocProvider<DashboardCubit>(create: (context) => DashboardCubit()),
         BlocProvider<PayeeCubit>(create: (context) => PayeeCubit()),
         BlocProvider<TagCubit>(create: (context) => TagCubit()),

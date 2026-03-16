@@ -208,6 +208,132 @@ class ApiService {
     }
   }
 
+  ResultFuture<Response> getAccounts(Map<String, Object> params) async {
+    try {
+      final response = await _networkClient.get(
+        ApiEndpoints.accounts,
+        params,
+      );
+      return Right(response);
+    } on AppException catch (e) {
+      return Left(ExceptionToFailureMapper.mapExceptionToFailure(e));
+    } catch (e) {
+      log('ApiService.getAccounts: Unexpected error - $e');
+      return Left(UnknownFailure(e.toString()));
+    }
+  }
+
+  ResultFuture<Response> createAccount(Map<String, Object> params) async {
+    try {
+      final response = await _networkClient.post(
+        ApiEndpoints.accounts,
+        params,
+      );
+      return Right(response);
+    } on AppException catch (e) {
+      return Left(ExceptionToFailureMapper.mapExceptionToFailure(e));
+    } catch (e) {
+      log('ApiService.createAccount: Unexpected error - $e');
+      return Left(UnknownFailure(e.toString()));
+    }
+  }
+
+  ResultFuture<Response> updateAccount(
+    String id,
+    Map<String, Object> params,
+  ) async {
+    try {
+      final response = await _networkClient.patch(
+        '${ApiEndpoints.accounts}/$id',
+        params,
+      );
+      return Right(response);
+    } on AppException catch (e) {
+      return Left(ExceptionToFailureMapper.mapExceptionToFailure(e));
+    } catch (e) {
+      log('ApiService.updateAccount: Unexpected error - $e');
+      return Left(UnknownFailure(e.toString()));
+    }
+  }
+
+  ResultFuture<Response> deleteAccount(String id) async {
+    try {
+      final response = await _networkClient.delete(
+        '${ApiEndpoints.accounts}/$id',
+        {},
+      );
+      return Right(response);
+    } on AppException catch (e) {
+      return Left(ExceptionToFailureMapper.mapExceptionToFailure(e));
+    } catch (e) {
+      log('ApiService.deleteAccount: Unexpected error - $e');
+      return Left(UnknownFailure(e.toString()));
+    }
+  }
+
+  ResultFuture<Response> getSubscriptions(Map<String, Object> params) async {
+    try {
+      final response = await _networkClient.get(
+        ApiEndpoints.subscriptions,
+        params,
+      );
+      return Right(response);
+    } on AppException catch (e) {
+      return Left(ExceptionToFailureMapper.mapExceptionToFailure(e));
+    } catch (e) {
+      log('ApiService.getSubscriptions: Unexpected error - $e');
+      return Left(UnknownFailure(e.toString()));
+    }
+  }
+
+  ResultFuture<Response> createSubscription(Map<String, Object> params) async {
+    try {
+      final response = await _networkClient.post(
+        ApiEndpoints.subscriptions,
+        params,
+      );
+      return Right(response);
+    } on AppException catch (e) {
+      return Left(ExceptionToFailureMapper.mapExceptionToFailure(e));
+    } catch (e) {
+      log('ApiService.createSubscription: Unexpected error - $e');
+      return Left(UnknownFailure(e.toString()));
+    }
+  }
+
+  ResultFuture<Response> updateSubscription(
+    String id,
+    Map<String, Object> params,
+  ) async {
+    try {
+      final response = await _networkClient.patch(
+        '${ApiEndpoints.subscriptions}/$id',
+        params,
+      );
+      return Right(response);
+    } on AppException catch (e) {
+      return Left(ExceptionToFailureMapper.mapExceptionToFailure(e));
+    } catch (e) {
+      log('ApiService.updateSubscription: Unexpected error - $e');
+      return Left(UnknownFailure(e.toString()));
+    }
+  }
+
+  ResultFuture<Response> deleteSubscription(String id) async {
+    try {
+      final response = await _networkClient.delete(
+        '${ApiEndpoints.subscriptions}/$id',
+        {},
+      );
+      return Right(response);
+    } on AppException catch (e) {
+      return Left(ExceptionToFailureMapper.mapExceptionToFailure(e));
+    } catch (e) {
+      log('ApiService.deleteSubscription: Unexpected error - $e');
+      return Left(UnknownFailure(e.toString()));
+    }
+  }
+
   ResultFuture<Response> createCategory(Map<String, Object> params) async {
     try {
       final response = await _networkClient.post(
