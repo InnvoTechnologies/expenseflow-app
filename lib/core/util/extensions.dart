@@ -1,5 +1,7 @@
 import 'dart:math';
 
+import 'package:intl/intl.dart';
+
 String generateRandomColorHex() {
   final random = Random();
   final colorValue = random.nextInt(0xFFFFFF + 1);
@@ -44,30 +46,17 @@ String formatCurrency(double amount, String currency) {
 }
 
 String currencySymbol(String currency) {
-  switch (currency.toUpperCase()) {
-    case 'USD':
-      return '\$';
-    case 'EUR':
-      return '€';
-    case 'GBP':
-      return '£';
-    case 'AUD':
-      return 'AUD';
-    case 'INR':
-      return '₹';
-    default:
-      return currency;
+  try {
+    return NumberFormat.simpleCurrency(name: currency.toUpperCase())
+        .currencySymbol;
+  } catch (_) {
+    return currency.toUpperCase();
   }
 }
 
 extension DateOnlyIsoExtension on DateTime {
-  /// Formats as `yyyy-MM-dd` with zero-padded year/month/day.
-  String toIsoDateOnly() {
-    final y = year.toString().padLeft(4, '0');
-    final m = month.toString().padLeft(2, '0');
-    final d = day.toString().padLeft(2, '0');
-    return '$y-$m-$d';
-  }
+  /// Formats as `yyyy-MM-dd` using intl.
+  String toIsoDateOnly() => DateFormat('yyyy-MM-dd').format(this);
 }
 
 String billingCycleLabel(String value) {
@@ -88,21 +77,7 @@ String billingCycleLabel(String value) {
 }
 
 String formatShortDate(DateTime date) {
-  const months = [
-    'Jan',
-    'Feb',
-    'Mar',
-    'Apr',
-    'May',
-    'Jun',
-    'Jul',
-    'Aug',
-    'Sep',
-    'Oct',
-    'Nov',
-    'Dec',
-  ];
-  return '${months[date.month - 1]} ${date.day}, ${date.year}';
+  return DateFormat('MMM d, yyyy').format(date);
 }
 
 DateTime? calculateNextBillingDate(DateTime start, String cycle) {
