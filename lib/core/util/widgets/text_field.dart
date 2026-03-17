@@ -7,7 +7,7 @@ class CustomTextField extends StatefulWidget {
     super.key,
     required this.hintText,
     this.isPasswordField = false,
-    required this.controller,
+    this.controller,
     this.validator,
     this.autovalidateMode = AutovalidateMode.always,
     this.keyboardType,
@@ -27,7 +27,7 @@ class CustomTextField extends StatefulWidget {
   });
   final String hintText;
   final bool isPasswordField;
-  final TextEditingController controller;
+  final TextEditingController? controller;
   final FormFieldValidator<String?>? validator;
   final AutovalidateMode autovalidateMode;
   final String? initialValue;
@@ -50,6 +50,29 @@ class CustomTextField extends StatefulWidget {
 
 class _CustomTextFieldState extends State<CustomTextField> {
   bool hidePassword = false;
+  late final TextEditingController _internalController;
+
+  TextEditingController get _controller =>
+      widget.controller ?? _internalController;
+
+  @override
+  void initState() {
+    super.initState();
+    _internalController = TextEditingController(
+      text: widget.initialValue ?? '',
+    );
+    if (widget.controller != null && widget.initialValue != null) {
+      widget.controller!.text = widget.initialValue!;
+    }
+  }
+
+  @override
+  void dispose() {
+    if (widget.controller == null) {
+      _internalController.dispose();
+    }
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -75,8 +98,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
             // ),
             enabled: widget.readOnly == true ? false : true,
             style: Theme.of(context).textTheme.bodyMedium,
-            initialValue: widget.initialValue,
-            controller: widget.controller,
+            controller: _controller,
             obscureText: hidePassword,
             validator: widget.validator,
             autofocus: widget.autofocus,

@@ -18,34 +18,49 @@ class TabBarWidget extends StatefulWidget {
 
 class _TabBarWidgetState extends State<TabBarWidget>
     with SingleTickerProviderStateMixin {
-  late TabController _tabController;
+  TabController? _tabController;
 
   @override
   void initState() {
     super.initState();
+    _initTabController();
+  }
+
+  void _initTabController() {
+    if (widget.items.isEmpty) return;
+    _tabController?.dispose();
     _tabController = TabController(
       length: widget.items.length,
       vsync: this,
-      initialIndex: widget.selectedIndex,
+      initialIndex: widget.selectedIndex.clamp(0, widget.items.length - 1),
     );
   }
 
   @override
   void didUpdateWidget(TabBarWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.selectedIndex != widget.selectedIndex) {
-      _tabController.animateTo(widget.selectedIndex);
+    if (oldWidget.items.length != widget.items.length) {
+      _initTabController();
+    } else if (oldWidget.selectedIndex != widget.selectedIndex &&
+        _tabController != null) {
+      _tabController!.animateTo(
+        widget.selectedIndex.clamp(0, widget.items.length - 1),
+      );
     }
   }
 
   @override
   void dispose() {
-    _tabController.dispose();
+    _tabController?.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    if (widget.items.isEmpty || _tabController == null) {
+      return const SizedBox.shrink();
+    }
+
     return Container(
       height: 50,
       width: double.infinity,
@@ -55,7 +70,7 @@ class _TabBarWidgetState extends State<TabBarWidget>
         borderRadius: BorderRadius.circular(5.0),
       ),
       child: TabBar(
-        controller: _tabController,
+        controller: _tabController!,
         indicator: BoxDecoration(
           color: Theme.of(context).primaryColor,
           borderRadius: BorderRadius.circular(5.0),
