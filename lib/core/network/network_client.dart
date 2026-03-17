@@ -1,6 +1,9 @@
 import 'package:cookie_jar/cookie_jar.dart';
 import 'package:dio/dio.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
+import 'package:expenseflow/core/util/const/constants.dart';
+import 'package:expenseflow/features/auth/bloc/auth_bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../error/exception_handler.dart';
@@ -51,10 +54,7 @@ class NetworkClient {
 
           if (appException is AuthenticationException &&
               appException.statusCode == 401) {
-            final requestPath = error.requestOptions.path;
-            if (requestPath.contains('/organizations')) {
-              // await _handleUnauthorizedError();
-            }
+            await _handleUnauthorizedError();
           }
 
           handler.reject(
@@ -87,13 +87,12 @@ class NetworkClient {
     _isInitialized = true;
   }
 
-  // Future<void> _handleUnauthorizedError() async {
-  //   final context = navigatorKey.currentContext;
-  //   if (context == null) return;
+  Future<void> _handleUnauthorizedError() async {
+    final context = navigatorKey.currentContext;
+    if (context == null) return;
 
-  //   // Just trigger logout - navigation will be handled by BlocListener in app root
-  //   context.read<AuthBloc>().add(const Logout());
-  // }
+    context.read<AuthBloc>().add(const Logout());
+  }
 
   // Ensure cookie jar is initialized before making requests
   Future<void> _ensureInitialized() async {
@@ -130,14 +129,21 @@ class NetworkClient {
   }
 
   // for HTTP.GET Request.
-  Future<Response> get(String url, Map<String, dynamic> params) async {
+  Future<Response> get(
+    String url,
+    Map<String, dynamic> params, {
+    Map<String, dynamic>? headers,
+  }) async {
     await _ensureInitialized();
     Response response;
     try {
       response = await _dio.get(
         url,
         queryParameters: params,
-        options: Options(responseType: ResponseType.json),
+        options: Options(
+          responseType: ResponseType.json,
+          headers: headers,
+        ),
       );
     } on DioException catch (exception) {
       // Check if error was already converted by interceptor
@@ -180,14 +186,21 @@ class NetworkClient {
   }
 
   // for HTTP.PUT Request.
-  Future<Response> put(String url, Map<String, dynamic> params) async {
+  Future<Response> put(
+    String url,
+    Map<String, dynamic> params, {
+    Map<String, dynamic>? headers,
+  }) async {
     await _ensureInitialized();
     Response response;
     try {
       response = await _dio.put(
         url,
         data: params,
-        options: Options(responseType: ResponseType.json),
+        options: Options(
+          responseType: ResponseType.json,
+          headers: headers,
+        ),
       );
     } on DioException catch (exception) {
       // Check if error was already converted by interceptor
@@ -200,14 +213,21 @@ class NetworkClient {
     return response;
   }
 
-  Future<Response> patch(String url, Map<String, dynamic> params) async {
+  Future<Response> patch(
+    String url,
+    Map<String, dynamic> params, {
+    Map<String, dynamic>? headers,
+  }) async {
     await _ensureInitialized();
     Response response;
     try {
       response = await _dio.patch(
         url,
         data: params,
-        options: Options(responseType: ResponseType.json),
+        options: Options(
+          responseType: ResponseType.json,
+          headers: headers,
+        ),
       );
     } on DioException catch (exception) {
       // Check if error was already converted by interceptor
@@ -221,14 +241,21 @@ class NetworkClient {
   }
 
   // for HTTP.DELETE Request.
-  Future<Response> delete(String url, dynamic params) async {
+  Future<Response> delete(
+    String url,
+    dynamic params, {
+    Map<String, dynamic>? headers,
+  }) async {
     await _ensureInitialized();
     Response response;
     try {
       response = await _dio.delete(
         url,
         data: params,
-        options: Options(responseType: ResponseType.json),
+        options: Options(
+          responseType: ResponseType.json,
+          headers: headers,
+        ),
       );
     } on DioException catch (exception) {
       // Check if error was already converted by interceptor

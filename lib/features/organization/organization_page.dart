@@ -1,7 +1,11 @@
 import 'package:expenseflow/core/util/const/constants.dart';
 import 'package:expenseflow/core/util/widgets/app_bar.dart';
+import 'package:expenseflow/core/util/loading/page_loading_spinner.dart';
+import 'package:expenseflow/features/organization/cubit/organization_cubit.dart';
+import 'package:expenseflow/features/organization/cubit/organization_state.dart';
 import 'package:expenseflow/features/settings/settings_page.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../core/util/widgets/icon_button.dart';
 import '../shell/shell_page.dart';
@@ -14,7 +18,17 @@ class OrganizationPage extends StatefulWidget {
 
 class _OrganizationPageState extends State<OrganizationPage> {
   @override
+  void initState() {
+    super.initState();
+    context.read<OrganizationCubit>().fetchOrganizations();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final textTheme = theme.textTheme;
+
     return Scaffold(
       appBar: AppBarWidget(
         title: 'ExpenseFlow',
@@ -31,35 +45,94 @@ class _OrganizationPageState extends State<OrganizationPage> {
           ),
         ],
       ),
-      body: ListView(
-        padding: kDefaultPadding,
-        children: [
-          Card(
-            child: ListTile(
-              onTap: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(builder: (context) => const ShellPage()),
-                );
-              },
-              leading: const Icon(Icons.person),
-              title: Text('Personal'),
-              // subtitle: Text(''),
-            ),
-          ),
-          const SizedBox(height: 8),
-          // Text('Organizations', style: Theme.of(context).textTheme.titleMedium),
-          // const SizedBox(height: 8),
-          // ...List.generate(DummyData.organizations.length, (i) {
-          //   final o = DummyData.organizations[i];
-          //   return Card(
-          //     child: ListTile(
-          //       leading: const Icon(Icons.business),
-          //       title: Text(o.name),
-          //       subtitle: Text(o.slug),
-          //     ),
-          //   );
-          // }),
-        ],
+      body: BlocBuilder<OrganizationCubit, OrganizationState>(
+        builder: (context, state) {
+          return ListView(
+            padding: kDefaultPadding,
+            children: [
+              Card(
+                child: ListTile(
+                  onTap: () {
+                    context.read<OrganizationCubit>().selectOrganization(null);
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const ShellPage(),
+                      ),
+                    );
+                  },
+                  leading: CircleAvatar(
+                    backgroundColor: colorScheme.primary.withValues(alpha: 0.15),
+                    child: Icon(
+                      Icons.person,
+                      color: colorScheme.primary,
+                    ),
+                  ),
+                  title: Text(
+                    'Personal',
+                    style: textTheme.titleMedium,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Organizations',
+                style: textTheme.titleMedium,
+              ),
+              const SizedBox(height: 8),
+              if (state is OrganizationLoading)
+                const Center(child: PageLoadingSpinner())
+              else if (state is OrganizationError)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  child: Text(
+                    state.message,
+                    style: textTheme.bodyMedium?.copyWith(
+                      color: colorScheme.error,
+                    ),
+                  ),
+                )
+              else if (state is OrganizationLoaded &&
+                  state.organizations.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  child: Text(
+                    'No organizations found',
+                    style: textTheme.bodyMedium,
+                  ),
+                )
+              else if (state is OrganizationLoaded)
+                ...state.organizations.map(
+                  (org) => Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: Card(
+                      child: ListTile(
+                        onTap: () {
+                          context
+                              .read<OrganizationCubit>()
+                              .selectOrganization(org);
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => const ShellPage(),
+                            ),
+                          );
+                        },
+                        leading: CircleAvatar(
+                          backgroundColor:
+                              colorScheme.surfaceContainerHighest,
+                          child: Icon(
+                            Icons.business,
+                            color: colorScheme.onSurface,
+                          ),
+                        ),
+                        title: Text(org.name),
+                        subtitle: Text(org.slug),
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          );
+        },
       ),
     );
   }
