@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../dashboard/dashboard_page.dart';
 import '../insights/insights_page.dart';
 import '../more/more_page.dart';
-import '../transactions/add_transaction_page.dart';
+import '../transactions/add_edit_transaction_page.dart';
 import '../transactions/transactions_page.dart';
 
 class ShellPage extends StatefulWidget {
@@ -60,7 +60,7 @@ class _ShellPageState extends State<ShellPage> {
           if (i == 2) {
             await Navigator.of(context).push(
               MaterialPageRoute(
-                builder: (_) => const AddTransactionPage(),
+                builder: (_) => const AddEditTransactionPage(),
                 fullscreenDialog: true,
               ),
             );

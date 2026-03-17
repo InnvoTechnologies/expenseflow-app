@@ -588,38 +588,41 @@ class _DashboardPageState extends State<DashboardPage> {
     final scheme = Theme.of(context).colorScheme;
     final total = entries.fold<double>(0, (p, e) => p + e.amount);
     final isEmpty = entries.isEmpty || total == 0;
-    return Card(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: scheme.outlineVariant, width: 1),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(8),
-        child: Column(
-          children: [
-            if (action != null)
-              Align(alignment: Alignment.topRight, child: action),
-            if (isEmpty)
-              DashboardCategoryEmptyState(
-                message: valueColor == scheme.primary
-                    ? 'No income data available'
-                    : 'No expense data available',
-              )
-            else
-              ...entries.take(5).map((e) {
-                final color = e.color != null
-                    ? convertColorStringToFlutterColor(e.color!)
-                    : scheme.primaryContainer;
-                final pct = total == 0 ? 0.0 : e.amount / total;
-                return _BreakdownTile(
-                  label: e.name,
-                  amount: e.amount,
-                  color: color,
-                  valueColor: valueColor,
-                  percent: pct,
-                );
-              }),
-          ],
+    return SizedBox(
+      width: double.infinity,
+      child: Card(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: BorderSide(color: scheme.outlineVariant, width: 1),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(8),
+          child: Column(
+            children: [
+              if (action != null)
+                Align(alignment: Alignment.topRight, child: action),
+              if (isEmpty)
+                DashboardCategoryEmptyState(
+                  message: valueColor == scheme.primary
+                      ? 'No income data available'
+                      : 'No expense data available',
+                )
+              else
+                ...entries.take(5).map((e) {
+                  final color = e.color != null
+                      ? convertColorStringToFlutterColor(e.color!)
+                      : scheme.primaryContainer;
+                  final pct = total == 0 ? 0.0 : e.amount / total;
+                  return _BreakdownTile(
+                    label: e.name,
+                    amount: e.amount,
+                    color: color,
+                    valueColor: valueColor,
+                    percent: pct,
+                  );
+                }),
+            ],
+          ),
         ),
       ),
     );
