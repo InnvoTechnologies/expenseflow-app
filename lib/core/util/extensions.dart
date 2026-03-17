@@ -59,6 +59,10 @@ extension DateOnlyIsoExtension on DateTime {
   String toIsoDateOnly() => DateFormat('yyyy-MM-dd').format(this);
 }
 
+extension UiDateFormatExtension on DateTime {
+  String toUiDate() => DateFormat('dd/MM/yyyy').format(this);
+}
+
 String billingCycleLabel(String value) {
   switch (value) {
     case 'DAILY':
@@ -78,6 +82,10 @@ String billingCycleLabel(String value) {
 
 String formatShortDate(DateTime date) {
   return DateFormat('MMM d, yyyy').format(date);
+}
+
+String formatDateTime(DateTime date) {
+  return DateFormat('MMM d, yyyy, h:mm a').format(date);
 }
 
 DateTime? calculateNextBillingDate(DateTime start, String cycle) {

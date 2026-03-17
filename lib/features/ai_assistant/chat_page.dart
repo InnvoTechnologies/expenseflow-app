@@ -31,7 +31,7 @@ class _ChatPageState extends State<ChatPage> {
                     padding: const EdgeInsets.all(12),
                     margin: const EdgeInsets.symmetric(vertical: 6),
                     constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.7),
-                    decoration: BoxDecoration(color: isUser ? Theme.of(context).colorScheme.primaryContainer : Theme.of(context).colorScheme.surfaceVariant, borderRadius: BorderRadius.circular(12)),
+                    decoration: BoxDecoration(color: isUser ? Theme.of(context).colorScheme.primaryContainer : Theme.of(context).colorScheme.surfaceContainerHighest, borderRadius: BorderRadius.circular(12)),
                     child: Text(m['text']!),
                   ),
                 );
@@ -71,7 +71,6 @@ class _ChatPageState extends State<ChatPage> {
       ),
     );
     if (confirmed == true) {
-      // final t = Transaction(id: 'tx${DateTime.now().millisecondsSinceEpoch}', amount: 50.0, type: TransactionType.expense, date: DateTime.now(), description: 'Groceries', accountId: DummyData.accounts[1].id, toAccountId: null, categoryId: DummyData.categories.firstWhere((c) => c.name == 'Groceries').id, payeeId: DummyData.payees.first.id, status: 'POSTED');
       setState(() {
         messages.add({'role': 'assistant', 'text': 'Transaction created: \$50 Groceries'});
       });

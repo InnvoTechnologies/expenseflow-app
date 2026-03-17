@@ -10,10 +10,8 @@ class ApiEndpoints {
   static const String forgotPassword = '/auth/forget-password/email-otp';
   static const String verifyOtp = '/auth/email-otp/check-verification-otp';
   static const String resetForgotPassword = '/auth/email-otp/reset-password';
-  // static String resetPin(String organizationId, String userId) =>
-  //     '/organization/$organizationId/users/$userId/reset-pin';
   static const String resetPassword = '/reset-password';
-  // static const String changePassword = '/auth/change-password';
+  static const String changePassword = '/auth/change-password';
 
   // ==================== Categories ====================
   static const String categories = '/categories';
@@ -27,15 +25,25 @@ class ApiEndpoints {
   // ==================== Subscriptions ====================
   static const String subscriptions = '/subscriptions';
 
+  // ==================== Reminders ====================
+  static const String reminders = '/reminders';
+
+  // ==================== Transactions ====================
+  static const String transactions = '/transactions';
+
   // ==================== Payees ====================
   static const String payees = '/payees';
 
   // ==================== Dashboard ====================
   static const String dashboard = '/dashboard';
 
+  // ==================== Organizations ====================
+  static const String organizations = '/organization';
+
   // ==================== User Profile ====================
   static const String updateProfile = '/user/update-profile';
-  static const String userSessions = '/user/sessions';
-  static const String revokeAllSessions = '/user/sessions';
+  static const String profile = '/profile';
+  static const String userSessions = '/profile/sessions';
+  static const String revokeAllSessions = '/profile/sessions/revoke-all';
   static const String getSession = '/auth/get-session';
 }

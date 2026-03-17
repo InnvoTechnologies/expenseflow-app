@@ -5,6 +5,7 @@ const String kBaseUrl = 'https://app.expenseflow.co/api';
 const String kCdnUrl = '';
 
 EdgeInsets kDefaultPadding = EdgeInsets.symmetric(horizontal: 8);
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 showSuccessSnackbar(String title) {
   Fluttertoast.showToast(
