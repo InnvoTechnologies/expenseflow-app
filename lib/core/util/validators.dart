@@ -39,4 +39,31 @@ class Validators {
     }
     return null;
   }
+
+  static String? currentPassword(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Please enter your current password';
+    }
+    return null;
+  }
+
+  static String? newPassword(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Please enter a new password';
+    }
+    if (value.trim().length < 8) {
+      return 'Password should be at least 8 characters';
+    }
+    return null;
+  }
+
+  static String? confirmPassword(String? value, String newPasswordValue) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Please confirm your new password';
+    }
+    if (value.trim() != newPasswordValue.trim()) {
+      return 'Passwords do not match';
+    }
+    return null;
+  }
 }
