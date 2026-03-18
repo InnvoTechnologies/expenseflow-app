@@ -3,6 +3,7 @@ import 'package:expenseflow/core/util/extensions.dart';
 import 'package:expenseflow/core/util/loading/page_loading_spinner.dart';
 import 'package:expenseflow/core/util/loading/show_loading_spinner.dart';
 import 'package:expenseflow/core/util/widgets/app_bar.dart';
+import 'package:expenseflow/core/util/widgets/custom_refresh_indicator.dart';
 import 'package:expenseflow/core/util/widgets/dialogs.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -45,99 +46,116 @@ class _SubscriptionsPageState extends State<SubscriptionsPage> {
 
           final subs = state.subscriptions;
 
-          return ListView.builder(
-            padding: kDefaultPadding,
-            itemCount: subs.length,
-            itemBuilder: (context, i) {
-              final s = subs[i];
-              final nextDate =
-                  calculateNextBillingDate(s.startDate, s.billingCycle);
-              final scheme = Theme.of(context).colorScheme;
+          return CustomRefreshIndicator(
+            onRefresh: () =>
+                context.read<SubscriptionCubit>().getSubscriptions(),
+            child: ListView.builder(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: kDefaultPadding,
+              itemCount: subs.length,
+              itemBuilder: (context, i) {
+                final s = subs[i];
+                final nextDate =
+                    calculateNextBillingDate(s.startDate, s.billingCycle);
+                final scheme = Theme.of(context).colorScheme;
 
-              return Card(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  side: BorderSide(color: scheme.outlineVariant, width: 1),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Flexible(
-                            fit: FlexFit.loose,
-                            child: Text(
-                              s.title,
-                              style: Theme.of(context).textTheme.titleMedium
-                                  ?.copyWith(fontWeight: FontWeight.bold),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              IconButton(
-                                icon: const Icon(Icons.edit, size: 20),
-                                onPressed: () => _openForm(subscription: s),
-                              ),
-                              IconButton(
-                                icon: const Icon(
-                                  Icons.delete_outline,
-                                  size: 20,
-                                ),
-                                onPressed: () => _confirmDelete(s),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                      Text(
-                        '${s.currency} ${s.amount.toStringAsFixed(2)} / ${billingCycleLabel(s.billingCycle)}',
-                        style: Theme.of(context).textTheme.bodyMedium,
-                      ),
-                      const SizedBox(height: 4),
-                      if (nextDate != null)
+                return Card(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    side: BorderSide(color: scheme.outlineVariant, width: 1),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
                         Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Icon(Icons.calendar_today_outlined, size: 14),
-                            const SizedBox(width: 4),
-                            Text(
-                              'Next: ${formatShortDate(nextDate)}',
-                              style: Theme.of(context).textTheme.bodySmall
-                                  ?.copyWith(color: scheme.onSurfaceVariant),
+                            Flexible(
+                              fit: FlexFit.loose,
+                              child: Text(
+                                s.title,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleMedium
+                                    ?.copyWith(fontWeight: FontWeight.bold),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  icon: const Icon(Icons.edit, size: 20),
+                                  onPressed: () =>
+                                      _openForm(subscription: s),
+                                ),
+                                IconButton(
+                                  icon: const Icon(
+                                    Icons.delete_outline,
+                                    size: 20,
+                                  ),
+                                  onPressed: () => _confirmDelete(s),
+                                ),
+                              ],
                             ),
                           ],
                         ),
-                      if (s.reminderEnabled) ...[
+                        Text(
+                          '${s.currency} ${s.amount.toStringAsFixed(2)} / ${billingCycleLabel(s.billingCycle)}',
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
                         const SizedBox(height: 4),
-                        Align(
-                          alignment: Alignment.bottomRight,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color: scheme.primary.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(999),
-                            ),
-                            child: Text(
-                              'Reminders On',
-                              style: Theme.of(context).textTheme.labelSmall
-                                  ?.copyWith(color: scheme.primary),
+                        if (nextDate != null)
+                          Row(
+                            children: [
+                              const Icon(
+                                Icons.calendar_today_outlined,
+                                size: 14,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                'Next: ${formatShortDate(nextDate)}',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodySmall
+                                    ?.copyWith(
+                                      color: scheme.onSurfaceVariant,
+                                    ),
+                              ),
+                            ],
+                          ),
+                        if (s.reminderEnabled) ...[
+                          const SizedBox(height: 4),
+                          Align(
+                            alignment: Alignment.bottomRight,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: scheme.primary.withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(999),
+                              ),
+                              child: Text(
+                                'Reminders On',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .labelSmall
+                                    ?.copyWith(color: scheme.primary),
+                              ),
                             ),
                           ),
-                        ),
+                        ],
                       ],
-                    ],
+                    ),
                   ),
-                ),
-              );
-            },
+                );
+              },
+            ),
           );
         },
       ),

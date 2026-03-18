@@ -6,6 +6,7 @@ import 'package:expenseflow/core/util/loading/show_loading_spinner.dart';
 import 'package:expenseflow/core/util/validators.dart';
 import 'package:expenseflow/core/util/widgets/app_bar.dart';
 import 'package:expenseflow/core/util/widgets/elevated_button.dart';
+import 'package:expenseflow/core/util/widgets/selection_sheet.dart';
 import 'package:expenseflow/core/util/widgets/text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -169,12 +170,6 @@ class _AddEditSubscriptionPageState extends State<AddEditSubscriptionPage> {
     }
   }
 
-  void _incrementAmount(bool up) {
-    final current = double.tryParse(_amountController.text.trim()) ?? 0.0;
-    final next = up ? current + 1 : (current - 1).clamp(0, double.infinity);
-    _amountController.text = next.toStringAsFixed(2);
-  }
-
   void _incrementNotify(bool up) {
     final current = int.tryParse(_notifyController.text.trim()) ?? 0;
     final next = up ? current + 1 : (current - 1).clamp(0, 365);
@@ -276,24 +271,38 @@ class _AddEditSubscriptionPageState extends State<AddEditSubscriptionPage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            'Billing Cycle',
-                            style: theme.textTheme.labelMedium,
-                          ),
-                          const SizedBox(height: 8),
-                          DropdownButtonFormField<String>(
-                            initialValue: _billingCycle,
-                            items: Subscription.billingCycles
-                                .map(
-                                  (b) => DropdownMenuItem<String>(
-                                    value: b['value'],
-                                    child: Text(b['label']!),
-                                  ),
-                                )
-                                .toList(),
-                            onChanged: (value) {
-                              if (value == null) return;
-                              setState(() => _billingCycle = value);
+                          SelectionSheetField(
+                            label: 'Billing Cycle',
+                            valueText: Subscription.billingCycles
+                                .firstWhere(
+                                  (b) => b['value'] == _billingCycle,
+                                  orElse: () => const {'value': '', 'label': ''},
+                                )['label'],
+                            placeholder: 'Select billing cycle',
+                            onTap: () async {
+                              final items = Subscription.billingCycles
+                                  .where((b) => (b['value'] ?? '').isNotEmpty)
+                                  .toList();
+                              final selected =
+                                  items.any((b) => b['value'] == _billingCycle)
+                                      ? items.firstWhere(
+                                          (b) => b['value'] == _billingCycle,
+                                        )
+                                      : null;
+
+                              final picked =
+                                  await showSingleSelectSheet<Map<String, String>>(
+                                context: context,
+                                title: 'Select Billing Cycle',
+                                items: items,
+                                selected: selected,
+                                labelOf: (m) => m['label'] ?? '',
+                              );
+                              if (picked == null) return;
+                              setState(() {
+                                _billingCycle =
+                                    picked['value'] ?? _billingCycle;
+                              });
                             },
                           ),
                         ],
@@ -308,20 +317,15 @@ class _AddEditSubscriptionPageState extends State<AddEditSubscriptionPage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Amount', style: theme.textTheme.labelMedium),
-                          const SizedBox(height: 8),
-                          _StepperField(
-                            valueText: _amountController.text,
-                            onIncrement: () {
-                              setState(() {
-                                _incrementAmount(true);
-                              });
-                            },
-                            onDecrement: () {
-                              setState(() {
-                                _incrementAmount(false);
-                              });
-                            },
+                          CustomTextField(
+                            controller: _amountController,
+                            hintText: '0.00',
+                            label: 'Amount',
+                            keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true,
+                            ),
+                            textInputAction: TextInputAction.next,
+                            validator: Validators.positiveAmount,
                           ),
                         ],
                       ),
@@ -362,29 +366,33 @@ class _AddEditSubscriptionPageState extends State<AddEditSubscriptionPage> {
                   ],
                 ),
                 const SizedBox(height: 16),
-                Text('Category (optional)', style: theme.textTheme.labelMedium),
-                const SizedBox(height: 8),
-                DropdownButtonFormField<String?>(
-                  value: effectiveCategoryId,
-                  isExpanded: true,
-                  menuMaxHeight: 320,
-                  items: [
-                    const DropdownMenuItem<String?>(
-                      value: null,
-                      child: Text('None'),
-                    ),
-                    ...categories.map(
-                      (c) => DropdownMenuItem<String?>(
-                        value: c.id,
-                        child: Text(
+                SelectionSheetField(
+                  label: 'Category (optional)',
+                  valueText: effectiveCategoryId == null
+                      ? null
+                      : categories
+                          .where((c) => c.id == effectiveCategoryId)
+                          .map(
+                            (c) =>
+                                '${c.name} (${c.type.name == 'income' ? 'Income' : 'Expense'})',
+                          )
+                          .first,
+                  placeholder: 'None',
+                  onTap: () async {
+                    final selected = effectiveCategoryId == null
+                        ? null
+                        : categories.firstWhere((c) => c.id == effectiveCategoryId);
+                    final picked = await showSingleSelectSheet(
+                      context: context,
+                      title: 'Select Category',
+                      items: categories,
+                      selected: selected,
+                      includeNone: true,
+                      noneLabel: 'None',
+                      labelOf: (c) =>
                           '${c.name} (${c.type.name == 'income' ? 'Income' : 'Expense'})',
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ),
-                  ],
-                  onChanged: (value) {
-                    setState(() => _selectedCategoryId = value);
+                    );
+                    setState(() => _selectedCategoryId = picked?.id);
                   },
                 ),
                 const SizedBox(height: 16),
@@ -393,24 +401,29 @@ class _AddEditSubscriptionPageState extends State<AddEditSubscriptionPage> {
                   style: theme.textTheme.labelMedium,
                 ),
                 const SizedBox(height: 8),
-                DropdownButtonFormField<String?>(
-                  value: effectiveAccountId,
-                  isExpanded: true,
-                  menuMaxHeight: 320,
-                  items: [
-                    const DropdownMenuItem<String?>(
-                      value: null,
-                      child: Text('None'),
-                    ),
-                    ...accounts.map(
-                      (a) => DropdownMenuItem<String?>(
-                        value: a.id,
-                        child: Text(a.name, overflow: TextOverflow.ellipsis),
-                      ),
-                    ),
-                  ],
-                  onChanged: (value) {
-                    setState(() => _selectedAccountId = value);
+                SelectionSheetField(
+                  label: 'Payment Account (optional)',
+                  valueText: effectiveAccountId == null
+                      ? null
+                      : accounts
+                          .where((a) => a.id == effectiveAccountId)
+                          .map((a) => a.name)
+                          .first,
+                  placeholder: 'None',
+                  onTap: () async {
+                    final selected = effectiveAccountId == null
+                        ? null
+                        : accounts.firstWhere((a) => a.id == effectiveAccountId);
+                    final picked = await showSingleSelectSheet(
+                      context: context,
+                      title: 'Select Payment Account',
+                      items: accounts,
+                      selected: selected,
+                      includeNone: true,
+                      noneLabel: 'None',
+                      labelOf: (a) => a.name,
+                    );
+                    setState(() => _selectedAccountId = picked?.id);
                   },
                 ),
                 const SizedBox(height: 16),

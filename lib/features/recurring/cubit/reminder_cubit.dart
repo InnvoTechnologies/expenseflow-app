@@ -40,7 +40,7 @@ class ReminderCubit extends Cubit<ReminderState> {
     final params = <String, Object>{
       'title': title,
       'description': description ?? '',
-      'dueDate': dueDate.toUtc().toIso8601String(),
+      'dueDate': dueDate.toIso8601String(),
       'status': 'PENDING',
     };
 
@@ -76,7 +76,7 @@ class ReminderCubit extends Cubit<ReminderState> {
     final params = <String, Object>{
       'title': title,
       'description': description ?? '',
-      'dueDate': dueDate.toUtc().toIso8601String(),
+      'dueDate': dueDate.toIso8601String(),
       'status': status,
     };
 

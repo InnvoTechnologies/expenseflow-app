@@ -4,6 +4,7 @@ import 'package:expenseflow/core/util/const/constants.dart';
 import 'package:expenseflow/core/util/loading/page_loading_spinner.dart';
 import 'package:expenseflow/core/util/loading/show_loading_spinner.dart';
 import 'package:expenseflow/core/util/widgets/app_bar.dart';
+import 'package:expenseflow/core/util/widgets/custom_refresh_indicator.dart';
 import 'package:expenseflow/core/util/widgets/dialogs.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -38,25 +39,27 @@ class _PayeesPageState extends State<PayeesPage> {
           ),
         ],
       ),
-      body: Padding(
-        padding: kDefaultPadding,
-        child: BlocBuilder<PayeeCubit, PayeeState>(
-          builder: (context, state) {
-            if (state is PayeeLoading) {
-              return const Center(child: PageLoadingSpinner());
-            }
+      body: BlocBuilder<PayeeCubit, PayeeState>(
+        builder: (context, state) {
+          if (state is PayeeLoading) {
+            return const Center(child: PageLoadingSpinner());
+          }
 
-            if (state is PayeeError) {
-              return Center(child: Text('Error: ${state.message}'));
-            }
+          if (state is PayeeError) {
+            return Center(child: Text('Error: ${state.message}'));
+          }
 
-            if (state.payees.isEmpty) {
-              return const Center(
-                child: Text('No payees found.'),
-              );
-            }
+          if (state.payees.isEmpty) {
+            return const Center(
+              child: Text('No payees found.'),
+            );
+          }
 
-            return ListView.builder(
+          return CustomRefreshIndicator(
+            onRefresh: () => context.read<PayeeCubit>().getPayees(),
+            child: ListView.builder(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: kDefaultPadding,
               itemCount: state.payees.length,
               itemBuilder: (context, i) {
                 final p = state.payees[i];
@@ -92,9 +95,9 @@ class _PayeesPageState extends State<PayeesPage> {
                   ),
                 );
               },
-            );
-          },
-        ),
+            ),
+          );
+        },
       ),
     );
   }

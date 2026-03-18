@@ -3,6 +3,8 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'account_model.freezed.dart';
 part 'account_model.g.dart';
 
+enum ApiAccountType { bank, cash, creditCard, mobileWallet, unknown }
+
 @freezed
 abstract class Account with _$Account {
   const factory Account({
@@ -41,11 +43,58 @@ abstract class Account with _$Account {
     );
   }
 
-  static const List<Map<String, String>> accountTypes = [
-    {'value': 'BANK', 'label': 'Bank Account'},
-    {'value': 'CASH', 'label': 'Cash'},
-    {'value': 'CREDIT_CARD', 'label': 'Credit Card'},
-    {'value': 'MOBILE_WALLET', 'label': 'Mobile Wallet'},
-  ];
+  static List<Map<String, String>> get accountTypes =>
+      [
+            ApiAccountType.bank,
+            ApiAccountType.cash,
+            ApiAccountType.creditCard,
+            ApiAccountType.mobileWallet,
+          ]
+          .map((t) => {'value': t.apiValue, 'label': t.dropdownLabel})
+          .toList(growable: false);
 }
 
+extension ApiAccountTypeX on ApiAccountType {
+  String get label => switch (this) {
+    ApiAccountType.bank => 'Bank',
+    ApiAccountType.cash => 'Cash',
+    ApiAccountType.creditCard => 'Card',
+    ApiAccountType.mobileWallet => 'Wallet',
+    ApiAccountType.unknown => 'Unknown',
+  };
+
+  String get apiValue => switch (this) {
+    ApiAccountType.bank => 'BANK',
+    ApiAccountType.cash => 'CASH',
+    ApiAccountType.creditCard => 'CREDIT_CARD',
+    ApiAccountType.mobileWallet => 'MOBILE_WALLET',
+    ApiAccountType.unknown => 'UNKNOWN',
+  };
+
+  String get dropdownLabel => switch (this) {
+    ApiAccountType.bank => 'Bank Account',
+    ApiAccountType.cash => 'Cash',
+    ApiAccountType.creditCard => 'Credit Card',
+    ApiAccountType.mobileWallet => 'Mobile Wallet',
+    ApiAccountType.unknown => 'Unknown',
+  };
+
+  static ApiAccountType fromApi(String? value) {
+    switch ((value ?? '').toUpperCase()) {
+      case 'BANK':
+        return ApiAccountType.bank;
+      case 'CASH':
+        return ApiAccountType.cash;
+      case 'CREDIT_CARD':
+        return ApiAccountType.creditCard;
+      case 'MOBILE_WALLET':
+        return ApiAccountType.mobileWallet;
+      default:
+        return ApiAccountType.unknown;
+    }
+  }
+}
+
+extension ApiAccountTypeParsing on String {
+  ApiAccountType toApiAccountType() => ApiAccountTypeX.fromApi(this);
+}

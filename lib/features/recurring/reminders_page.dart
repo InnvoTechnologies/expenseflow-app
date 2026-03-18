@@ -2,6 +2,7 @@ import 'package:expenseflow/core/util/const/constants.dart';
 import 'package:expenseflow/core/util/loading/page_loading_spinner.dart';
 import 'package:expenseflow/core/util/loading/show_loading_spinner.dart';
 import 'package:expenseflow/core/util/widgets/app_bar.dart';
+import 'package:expenseflow/core/util/widgets/custom_refresh_indicator.dart';
 import 'package:expenseflow/core/util/widgets/dialogs.dart';
 import 'package:expenseflow/core/util/widgets/tab_bar.dart';
 import 'package:expenseflow/features/recurring/add_edit_reminder_page.dart';
@@ -72,7 +73,7 @@ class _RemindersPageState extends State<RemindersPage> {
               (state as ReminderLoaded).reminders;
           final filtered = _filteredReminders(reminders);
 
-          return RefreshIndicator(
+          return CustomRefreshIndicator(
             onRefresh: () => context.read<ReminderCubit>().getReminders(),
             child: SingleChildScrollView(
               physics: const AlwaysScrollableScrollPhysics(),

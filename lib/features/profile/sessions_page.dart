@@ -2,6 +2,7 @@ import 'package:expenseflow/core/util/const/constants.dart';
 import 'package:expenseflow/core/util/extensions.dart';
 import 'package:expenseflow/core/util/loading/page_loading_spinner.dart';
 import 'package:expenseflow/core/util/widgets/app_bar.dart';
+import 'package:expenseflow/core/util/widgets/custom_refresh_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -34,13 +35,14 @@ class SessionsPage extends StatelessWidget {
             final hasOtherSessions =
                 sessions.any((session) => !session.isCurrent);
 
-            return Column(
-              children: [
-                if (hasOtherSessions)
-                  Padding(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    child: Align(
+            return CustomRefreshIndicator(
+              onRefresh: () => context.read<SessionsCubit>().fetchSessions(),
+              child: ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: kDefaultPadding.copyWith(top: 8, bottom: 16),
+                children: [
+                  if (hasOtherSessions)
+                    Align(
                       alignment: Alignment.centerRight,
                       child: TextButton(
                         onPressed: () {
@@ -49,18 +51,9 @@ class SessionsPage extends StatelessWidget {
                         child: const Text('Revoke All Other Sessions'),
                       ),
                     ),
-                  ),
-                Expanded(
-                  child: ListView.builder(
-                    padding: kDefaultPadding.copyWith(top: 8, bottom: 16),
-                    itemCount: sessions.length,
-                    itemBuilder: (context, index) {
-                      final session = sessions[index];
-                      return _SessionCard(session: session);
-                    },
-                  ),
-                ),
-              ],
+                  ...sessions.map((session) => _SessionCard(session: session)),
+                ],
+              ),
             );
           },
         ),

@@ -1,6 +1,7 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'package:expenseflow/core/util/widgets/app_bar.dart';
+import 'package:expenseflow/core/util/widgets/custom_refresh_indicator.dart';
 import 'package:expenseflow/features/categories/cubit/category_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -40,24 +41,34 @@ class _CategoriesPageState extends State<CategoriesPage> {
           ),
         ],
       ),
-      body: Padding(
-        padding: kDefaultPadding,
-        child: BlocBuilder<CategoryCubit, CategoryState>(
-          builder: (context, state) {
-            if (state is CategoryLoading) {
-              return const Center(child: PageLoadingSpinner());
-            }
+      body: BlocBuilder<CategoryCubit, CategoryState>(
+        builder: (context, state) {
+          if (state is CategoryLoading) {
+            return const Center(child: PageLoadingSpinner());
+          }
 
-            if (state is CategoryError) {
-              return Center(child: Text('Error: ${state.message}'));
-            }
-            if (state.categories.isEmpty) {
-              return const Center(
-                child: Text('No categories found. Please add some.'),
-              );
-            }
+          if (state is CategoryError) {
+            return Center(child: Text('Error: ${state.message}'));
+          }
+          if (state.categories.isEmpty) {
+            return const Center(
+              child: Text('No categories found. Please add some.'),
+            );
+          }
 
-            return Column(
+          final filtered = state.categories
+              .where(
+                (c) => tab == 0
+                    ? c.type == CategoryType.income
+                    : c.type == CategoryType.expense,
+              )
+              .toList();
+
+          return CustomRefreshIndicator(
+            onRefresh: () => context.read<CategoryCubit>().getCategories(),
+            child: ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: kDefaultPadding,
               children: [
                 TabBarWidget(
                   onChanged: (index) => setState(() => tab = index),
@@ -67,57 +78,38 @@ class _CategoriesPageState extends State<CategoriesPage> {
                   ],
                   selectedIndex: tab,
                 ),
-                SizedBox(height: 10),
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: state.categories
-                        .where(
-                          (c) => tab == 0
-                              ? c.type == CategoryType.income
-                              : c.type == CategoryType.expense,
-                        )
-                        .length,
-
-                    itemBuilder: (context, i) {
-                      final category = state.categories
-                          .where(
-                            (c) => tab == 0
-                                ? c.type == CategoryType.income
-                                : c.type == CategoryType.expense,
-                          )
-                          .toList()[i];
-                      return Card(
-                        child: ListTile(
-                          leading: CircleAvatar(
-                            backgroundColor: convertColorStringToFlutterColor(
-                              category.color,
-                            ),
-                          ),
-                          title: Text(category.name),
-                          subtitle: Text(category.type.name.toUpperCase()),
-                          trailing: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              IconButton(
-                                onPressed: () =>
-                                    _navigateToAddEdit(category: category),
-                                icon: const Icon(Icons.edit),
-                              ),
-                              IconButton(
-                                onPressed: () => _confirmDelete(category),
-                                icon: const Icon(Icons.delete_outline),
-                              ),
-                            ],
-                          ),
+                const SizedBox(height: 10),
+                ...filtered.map(
+                  (category) => Card(
+                    child: ListTile(
+                      leading: CircleAvatar(
+                        backgroundColor: convertColorStringToFlutterColor(
+                          category.color,
                         ),
-                      );
-                    },
+                      ),
+                      title: Text(category.name),
+                      subtitle: Text(category.type.name.toUpperCase()),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            onPressed: () =>
+                                _navigateToAddEdit(category: category),
+                            icon: const Icon(Icons.edit),
+                          ),
+                          IconButton(
+                            onPressed: () => _confirmDelete(category),
+                            icon: const Icon(Icons.delete_outline),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
               ],
-            );
-          },
-        ),
+            ),
+          );
+        },
       ),
     );
   }

@@ -3,6 +3,7 @@ import 'package:expenseflow/core/util/extensions.dart';
 import 'package:expenseflow/core/util/loading/page_loading_spinner.dart';
 import 'package:expenseflow/core/util/loading/show_loading_spinner.dart';
 import 'package:expenseflow/core/util/widgets/app_bar.dart';
+import 'package:expenseflow/core/util/widgets/custom_refresh_indicator.dart';
 import 'package:expenseflow/core/util/widgets/dialogs.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -48,66 +49,73 @@ class _AccountsPageState extends State<AccountsPage> {
             );
           }
 
-          return ListView.builder(
-            padding: kDefaultPadding,
-            itemCount: state.accounts.length,
-            itemBuilder: (context, i) {
-              final Account a = state.accounts[i];
-              final balanceText = formatCurrency(a.currentBalance, a.currency);
-              return Card(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Icon(Icons.account_balance),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+          return CustomRefreshIndicator(
+            onRefresh: () => context.read<AccountCubit>().getAccounts(),
+            child: ListView.builder(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: kDefaultPadding,
+              itemCount: state.accounts.length,
+              itemBuilder: (context, i) {
+                final Account a = state.accounts[i];
+                final balanceText = formatCurrency(a.currentBalance, a.currency);
+                return Card(
+                  child: Padding(
+                    padding:
+                        const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Icon(Icons.account_balance),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(a.name),
+                              const SizedBox(height: 4),
+                              Text(
+                                balanceText,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyMedium
+                                    ?.copyWith(
+                                      fontWeight: FontWeight.w600,
+                                      color: a.currentBalance < 0
+                                          ? Theme.of(context)
+                                              .colorScheme
+                                              .error
+                                          : null,
+                                    ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                '${a.type} • ${a.currency}',
+                                style: Theme.of(context).textTheme.bodySmall,
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Text(a.name),
-                            const SizedBox(height: 4),
-                            Text(
-                              balanceText,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodyMedium
-                                  ?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                    color: a.currentBalance < 0
-                                        ? Theme.of(context).colorScheme.error
-                                        : null,
-                                  ),
+                            IconButton(
+                              onPressed: () => _navigateToAddEdit(account: a),
+                              icon: const Icon(Icons.edit),
                             ),
-                            const SizedBox(height: 4),
-                            Text(
-                              '${a.type} • ${a.currency}',
-                              style: Theme.of(context).textTheme.bodySmall,
+                            IconButton(
+                              onPressed: () => _confirmDelete(a),
+                              icon: const Icon(Icons.delete_outline),
                             ),
                           ],
                         ),
-                      ),
-                      const SizedBox(width: 8),
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          IconButton(
-                            onPressed: () => _navigateToAddEdit(account: a),
-                            icon: const Icon(Icons.edit),
-                          ),
-                          IconButton(
-                            onPressed: () => _confirmDelete(a),
-                            icon: const Icon(Icons.delete_outline),
-                          ),
-                        ],
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-              );
-            },
+                );
+              },
+            ),
           );
         },
       ),

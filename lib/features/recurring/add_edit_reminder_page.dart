@@ -35,7 +35,8 @@ class _AddEditReminderPageState extends State<AddEditReminderPage> {
     final r = widget.reminder;
     _titleController = TextEditingController(text: r?.title ?? '');
     _descriptionController = TextEditingController(text: r?.description ?? '');
-    _dueDate = r?.dueDate ?? DateTime.now().add(const Duration(hours: 7));
+    _dueDate =
+        (r?.dueDate ?? DateTime.now().add(const Duration(hours: 7))).toLocal();
   }
 
   @override
@@ -52,7 +53,7 @@ class _AddEditReminderPageState extends State<AddEditReminderPage> {
                 ? _descriptionController.text.trim()
                 : null) !=
             r.description ||
-        !_isSameDateTime(_dueDate, r.dueDate);
+        !_isSameDateTime(_dueDate, r.dueDate.toLocal());
   }
 
   bool _isSameDateTime(DateTime a, DateTime b) {
@@ -63,42 +64,30 @@ class _AddEditReminderPageState extends State<AddEditReminderPage> {
         a.minute == b.minute;
   }
 
-  Future<void> _pickDate() async {
-    final picked = await showDatePicker(
+  Future<void> _pickDateTime() async {
+    final pickedDate = await showDatePicker(
       context: context,
       initialDate: _dueDate,
       firstDate: DateTime(2000),
       lastDate: DateTime(2100),
     );
-    if (picked != null) {
-      setState(() {
-        _dueDate = DateTime(
-          picked.year,
-          picked.month,
-          picked.day,
-          _dueDate.hour,
-          _dueDate.minute,
-        );
-      });
-    }
-  }
+    if (pickedDate == null) return;
 
-  Future<void> _pickTime() async {
-    final picked = await showTimePicker(
+    final pickedTime = await showTimePicker(
       context: context,
       initialTime: TimeOfDay(hour: _dueDate.hour, minute: _dueDate.minute),
     );
-    if (picked != null) {
-      setState(() {
-        _dueDate = DateTime(
-          _dueDate.year,
-          _dueDate.month,
-          _dueDate.day,
-          picked.hour,
-          picked.minute,
-        );
-      });
-    }
+    if (pickedTime == null) return;
+
+    setState(() {
+      _dueDate = DateTime(
+        pickedDate.year,
+        pickedDate.month,
+        pickedDate.day,
+        pickedTime.hour,
+        pickedTime.minute,
+      );
+    });
   }
 
   Future<void> _submit() async {
@@ -186,42 +175,20 @@ class _AddEditReminderPageState extends State<AddEditReminderPage> {
                 const SizedBox(height: 16),
                 Text('Due Date & Time', style: theme.textTheme.labelMedium),
                 const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: _pickDate,
-                        child: InputDecorator(
-                          decoration: const InputDecoration(
-                            border: OutlineInputBorder(),
-                            contentPadding: EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 18,
-                            ),
-                          ),
-                          child: Text(formatShortDate(_dueDate)),
-                        ),
+                GestureDetector(
+                  onTap: _pickDateTime,
+                  child: InputDecorator(
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      contentPadding: EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 18,
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: _pickTime,
-                        child: InputDecorator(
-                          decoration: const InputDecoration(
-                            border: OutlineInputBorder(),
-                            contentPadding: EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 18,
-                            ),
-                          ),
-                          child: Text(
-                            '${_dueDate.hour.toString().padLeft(2, '0')}:${_dueDate.minute.toString().padLeft(2, '0')}',
-                          ),
-                        ),
-                      ),
+                    child: Text(
+                      formatDateTime(_dueDate),
                     ),
-                  ],
+                  ),
                 ),
                 const SizedBox(height: 32),
               ],
