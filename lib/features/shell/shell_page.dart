@@ -1,7 +1,7 @@
+import 'package:expenseflow/features/ai_assistant/chat_page.dart';
 import 'package:flutter/material.dart';
 
 import '../dashboard/dashboard_page.dart';
-import '../insights/insights_page.dart';
 import '../more/more_page.dart';
 import '../transactions/add_edit_transaction_page.dart';
 import '../transactions/transactions_page.dart';
@@ -17,7 +17,7 @@ class _ShellPageState extends State<ShellPage> {
   final pages = const [
     DashboardPage(),
     TransactionsPage(),
-    InsightsPage(),
+    ChatPage(),
     MorePage(),
   ];
   @override
@@ -45,8 +45,8 @@ class _ShellPageState extends State<ShellPage> {
             label: '',
           ),
           const NavigationDestination(
-            icon: Icon(Icons.stacked_bar_chart_outlined),
-            selectedIcon: Icon(Icons.stacked_bar_chart, color: Colors.white),
+            icon: Icon(Icons.chat_outlined),
+            selectedIcon: Icon(Icons.chat, color: Colors.white),
             label: '',
           ),
           const NavigationDestination(
