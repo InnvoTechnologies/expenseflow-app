@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 
-import '../../../domain/models/transaction.dart';
+import 'package:expenseflow/core/util/extensions.dart';
+import 'package:expenseflow/features/transactions/model/transaction_model.dart';
 import '../../payees/model/payee_model.dart';
+import '../model/dashboard_model.dart';
 
 class TransactionItem extends StatelessWidget {
-  final Transaction transaction;
+  final DashboardTransaction transaction;
   // final Category? category;
   final Payee? payee;
   final VoidCallback? onTap;
@@ -62,45 +64,53 @@ class TransactionItem extends StatelessWidget {
   }
 
   IconData _getTransactionIcon() {
-    switch (transaction.type) {
-      case TransactionType.income:
+    switch (ApiTransactionTypeX.fromApi(transaction.type)) {
+      case ApiTransactionType.income:
         return Icons.arrow_downward;
-      case TransactionType.expense:
+      case ApiTransactionType.expense:
         return Icons.arrow_upward;
-      case TransactionType.transfer:
+      case ApiTransactionType.transfer:
         return Icons.swap_horiz;
+      case ApiTransactionType.unknown:
+        return Icons.receipt_long_outlined;
     }
   }
 
   Color _getIconColor(ColorScheme scheme) {
-    switch (transaction.type) {
-      case TransactionType.income:
+    switch (ApiTransactionTypeX.fromApi(transaction.type)) {
+      case ApiTransactionType.income:
         return scheme.primary.withValues(alpha: 0.1);
-      case TransactionType.expense:
+      case ApiTransactionType.expense:
         return scheme.error.withValues(alpha: 0.1);
-      case TransactionType.transfer:
+      case ApiTransactionType.transfer:
         return scheme.secondary.withValues(alpha: 0.1);
+      case ApiTransactionType.unknown:
+        return scheme.surfaceContainerHighest;
     }
   }
 
   Color _getIconForegroundColor(ColorScheme scheme) {
-    switch (transaction.type) {
-      case TransactionType.income:
+    switch (ApiTransactionTypeX.fromApi(transaction.type)) {
+      case ApiTransactionType.income:
         return scheme.primary;
-      case TransactionType.expense:
+      case ApiTransactionType.expense:
         return scheme.error;
-      case TransactionType.transfer:
+      case ApiTransactionType.transfer:
         return scheme.secondary;
+      case ApiTransactionType.unknown:
+        return scheme.onSurfaceVariant;
     }
   }
 
   Color _getAmountColor(ColorScheme scheme) {
-    switch (transaction.type) {
-      case TransactionType.income:
+    switch (ApiTransactionTypeX.fromApi(transaction.type)) {
+      case ApiTransactionType.income:
         return scheme.primary;
-      case TransactionType.expense:
+      case ApiTransactionType.expense:
         return scheme.error;
-      case TransactionType.transfer:
+      case ApiTransactionType.transfer:
+        return scheme.onSurface;
+      case ApiTransactionType.unknown:
         return scheme.onSurface;
     }
   }
@@ -110,8 +120,10 @@ class TransactionItem extends StatelessWidget {
 
     // Format date
     final date = transaction.date;
-    final formattedDate = '${_getMonthName(date.month)} ${date.day}';
-    parts.add(formattedDate);
+    if (date != null) {
+      final formattedDate = formatMonthDay(date);
+      parts.add(formattedDate);
+    }
 
     // Add category or payee info
     // if (category != null) {
@@ -123,31 +135,17 @@ class TransactionItem extends StatelessWidget {
     return parts.join(' • ');
   }
 
-  String _getMonthName(int month) {
-    const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-    ];
-    return months[month - 1];
-  }
-
   String _formatAmount() {
-    final prefix = transaction.type == TransactionType.income
-        ? ''
-        : transaction.type == TransactionType.expense
+    final prefix =
+        ApiTransactionTypeX.fromApi(transaction.type) ==
+            ApiTransactionType.expense
         ? '-'
         : '';
 
-    return '$prefix\$${transaction.amount.toStringAsFixed(2).replaceAllMapped(RegExp(r'(\d)(?=(\d{3})+(?!\d))'), (match) => '${match[1]},')}';
+    return formatSignedCurrency(
+      transaction.amount,
+      isNegative: prefix == '-',
+      currency: 'USD',
+    );
   }
 }

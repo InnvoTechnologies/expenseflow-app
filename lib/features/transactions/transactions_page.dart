@@ -4,6 +4,7 @@ import 'package:expenseflow/core/util/extensions.dart';
 import 'package:expenseflow/core/util/loading/page_loading_spinner.dart';
 import 'package:expenseflow/core/util/loading/show_loading_spinner.dart'
     show showLoadingSpinner;
+import 'package:expenseflow/core/util/widgets/custom_refresh_indicator.dart';
 import 'package:expenseflow/core/util/widgets/dialogs.dart';
 import 'package:expenseflow/core/util/widgets/tab_bar.dart';
 import 'package:flutter/material.dart';
@@ -23,6 +24,29 @@ class TransactionsPage extends StatefulWidget {
 
 class _TransactionsPageState extends State<TransactionsPage> {
   int filter = 0;
+  late final ScrollController _scrollController;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController = ScrollController()..addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    final position = _scrollController.position;
+    if (!position.hasPixels) return;
+    if (position.pixels >= position.maxScrollExtent - 300) {
+      context.read<TransactionsCubit>().loadMore();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
@@ -39,7 +63,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                 ),
               );
               if (changed == true && mounted) {
-                context.read<TransactionsCubit>().fetchTransactions();
+                context.read<TransactionsCubit>().refresh();
               }
             },
             icon: const Icon(Icons.add),
@@ -52,7 +76,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                 ),
               );
               if (changed == true && mounted) {
-                context.read<TransactionsCubit>().fetchTransactions();
+                context.read<TransactionsCubit>().refresh();
               }
             },
             icon: const Icon(Icons.swap_horiz),
@@ -84,54 +108,94 @@ class _TransactionsPageState extends State<TransactionsPage> {
 
           final isEmpty = items.isEmpty;
 
-          return ListView(
-            padding: kDefaultPadding,
-            children: [
-              TabBarWidget(
-                onChanged: (i) => setState(() => filter = i),
-                items: const [
-                  Tab(text: 'All'),
-                  Tab(text: 'Income'),
-                  Tab(text: 'Expense'),
-                  Tab(text: 'Transfer'),
-                ],
-              ),
-              const SizedBox(height: 8),
-              if (isEmpty)
-                Padding(
-                  padding: const EdgeInsets.only(top: 80),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.receipt_long_outlined,
-                        size: 64,
-                        color: scheme.onSurfaceVariant,
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'No transactions found',
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Try adjusting your filters',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: scheme.onSurfaceVariant,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
+          return CustomRefreshIndicator(
+            onRefresh: () => context.read<TransactionsCubit>().refresh(),
+            child: ListView.builder(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: kDefaultPadding,
+              controller: _scrollController,
+              itemCount: 1 +
+                  1 +
+                  (isEmpty ? 1 : items.length) +
+                  ((state.hasMore || state.isLoadingMore) ? 1 : 0),
+              itemBuilder: (context, index) {
+                if (index == 0) {
+                  return TabBarWidget(
+                    onChanged: (i) => setState(() => filter = i),
+                    items: const [
+                      Tab(text: 'All'),
+                      Tab(text: 'Income'),
+                      Tab(text: 'Expense'),
+                      Tab(text: 'Transfer'),
                     ],
+                  );
+                }
+
+                if (index == 1) return const SizedBox(height: 8);
+
+                if (isEmpty) {
+                  if (index == 2) {
+                    return Padding(
+                      padding: const EdgeInsets.only(top: 80),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.receipt_long_outlined,
+                            size: 64,
+                            color: scheme.onSurfaceVariant,
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'No transactions found',
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Try adjusting your filters',
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodySmall
+                                ?.copyWith(
+                                  color: scheme.onSurfaceVariant,
+                                ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+                } else {
+                  final itemStart = 2;
+                  final itemEndExclusive = itemStart + items.length;
+                  if (index >= itemStart && index < itemEndExclusive) {
+                    final t = items[index - itemStart];
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: _TransactionCard(transaction: t),
+                    );
+                  }
+                }
+
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  child: Center(
+                    child: state.isLoadingMore
+                        ? const SizedBox(
+                            width: 22,
+                            height: 22,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : Text(
+                            'No more transactions',
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: scheme.onSurfaceVariant,
+                                ),
+                          ),
                   ),
-                )
-              else
-                ...items.map(
-                  (t) => Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
-                    child: _TransactionCard(transaction: t),
-                  ),
-                ),
-            ],
+                );
+              },
+            ),
           );
         },
       ),

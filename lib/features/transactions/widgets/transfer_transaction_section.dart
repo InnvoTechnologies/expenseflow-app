@@ -1,5 +1,6 @@
 import 'package:expenseflow/core/util/widgets/text_field.dart';
 import 'package:expenseflow/core/util/extensions.dart';
+import 'package:expenseflow/core/util/widgets/selection_sheet.dart';
 import 'package:expenseflow/features/accounts/model/account_model.dart';
 import 'package:expenseflow/features/tags/model/tag_model.dart';
 import 'package:flutter/material.dart';
@@ -22,11 +23,19 @@ class TransferTransactionSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final fromAccountValue =
-        accounts.any((a) => a.id == form.accountId) ? form.accountId : null;
-    final toAccountValue =
-        accounts.any((a) => a.id == form.toAccountId) ? form.toAccountId : null;
-    final tagValue = tags.any((t) => t.id == form.tagId) ? form.tagId : null;
+    final selectedFromAccount = accounts.any((a) => a.id == form.accountId)
+        ? accounts.firstWhere((a) => a.id == form.accountId)
+        : null;
+    final selectedToAccount = accounts.any((a) => a.id == form.toAccountId)
+        ? accounts.firstWhere((a) => a.id == form.toAccountId)
+        : null;
+    final selectedTags =
+        tags.where((t) => form.tagIds.contains(t.id)).toList();
+    final tagsLabel = selectedTags.isEmpty
+        ? null
+        : selectedTags.length <= 2
+            ? selectedTags.map((t) => t.name).join(', ')
+            : '${selectedTags.length} tags selected';
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -34,38 +43,40 @@ class TransferTransactionSection extends StatelessWidget {
         Row(
           children: [
             Expanded(
-              child: DropdownButtonFormField<String>(
-                key: ValueKey('transfer-from-$fromAccountValue'),
-                initialValue: fromAccountValue,
-                isExpanded: true,
-                decoration: const InputDecoration(labelText: 'From Account *'),
-                items: accounts
-                    .map(
-                      (a) => DropdownMenuItem<String>(
-                        value: a.id,
-                        child: Text(a.name, overflow: TextOverflow.ellipsis),
-                      ),
-                    )
-                    .toList(),
-                onChanged: form.setAccountId,
+              child: SelectionSheetField(
+                label: 'From Account',
+                requiredField: true,
+                valueText: selectedFromAccount?.name,
+                placeholder: 'Select account',
+                onTap: () async {
+                  final picked = await showSingleSelectSheet<Account>(
+                    context: context,
+                    title: 'Select From Account',
+                    items: accounts,
+                    selected: selectedFromAccount,
+                    labelOf: (a) => a.name,
+                  );
+                  form.setAccountId(picked?.id);
+                },
               ),
             ),
             const SizedBox(width: 12),
             Expanded(
-              child: DropdownButtonFormField<String>(
-                key: ValueKey('transfer-to-$toAccountValue'),
-                initialValue: toAccountValue,
-                isExpanded: true,
-                decoration: const InputDecoration(labelText: 'To Account *'),
-                items: accounts
-                    .map(
-                      (a) => DropdownMenuItem<String>(
-                        value: a.id,
-                        child: Text(a.name, overflow: TextOverflow.ellipsis),
-                      ),
-                    )
-                    .toList(),
-                onChanged: form.setToAccountId,
+              child: SelectionSheetField(
+                label: 'To Account',
+                requiredField: true,
+                valueText: selectedToAccount?.name,
+                placeholder: 'Select account',
+                onTap: () async {
+                  final picked = await showSingleSelectSheet<Account>(
+                    context: context,
+                    title: 'Select To Account',
+                    items: accounts,
+                    selected: selectedToAccount,
+                    labelOf: (a) => a.name,
+                  );
+                  form.setToAccountId(picked?.id);
+                },
               ),
             ),
           ],
@@ -99,22 +110,21 @@ class TransferTransactionSection extends StatelessWidget {
           onChanged: form.setDescription,
         ),
         const SizedBox(height: 16),
-        Text('Tags (Optional)', style: theme.textTheme.labelMedium),
-        const SizedBox(height: 8),
-        DropdownButtonFormField<String?>(
-          key: ValueKey('transfer-tag-$tagValue'),
-          initialValue: tagValue,
-          isExpanded: true,
-          items: [
-            const DropdownMenuItem<String?>(value: null, child: Text('None')),
-            ...tags.map(
-              (t) => DropdownMenuItem<String?>(
-                value: t.id,
-                child: Text(t.name, overflow: TextOverflow.ellipsis),
-              ),
-            ),
-          ],
-          onChanged: form.setTagId,
+        SelectionSheetField(
+          label: 'Tags (Optional)',
+          valueText: tagsLabel,
+          placeholder: 'None',
+          onTap: () async {
+            final picked = await showMultiSelectSheet<Tag>(
+              context: context,
+              title: 'Select Tags',
+              items: tags,
+              selected: selectedTags.toSet(),
+              labelOf: (t) => t.name,
+            );
+            if (picked == null) return;
+            form.setTagIds(picked.map((t) => t.id).toList());
+          },
         ),
         const SizedBox(height: 16),
       ],

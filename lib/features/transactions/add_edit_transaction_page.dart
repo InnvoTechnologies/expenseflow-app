@@ -128,7 +128,7 @@ class _AddEditTransactionPageState extends State<AddEditTransactionPage> {
       'date': _form.date.toIso8601String(),
       'description': description,
       'status': 'completed',
-      'tagIds': _form.tagId != null ? <String>[_form.tagId!] : <String>[],
+      'tagIds': _form.tagIds,
     };
 
     if (_selectedTab == 2) {

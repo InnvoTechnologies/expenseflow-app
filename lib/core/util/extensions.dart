@@ -29,7 +29,9 @@ String getMonthName(int month) {
 }
 
 String formatAudAmount(double value) {
-  final formatted = value.toStringAsFixed(2).replaceAllMapped(
+  final formatted = value
+      .toStringAsFixed(2)
+      .replaceAllMapped(
         RegExp(r'(\d)(?=(\d{3})+(?!\d))'),
         (match) => '${match[1]},',
       );
@@ -38,17 +40,37 @@ String formatAudAmount(double value) {
 
 String formatCurrency(double amount, String currency) {
   final symbol = currencySymbol(currency);
-  final formatted = amount.toStringAsFixed(2).replaceAllMapped(
+  final formatted = amount
+      .toStringAsFixed(2)
+      .replaceAllMapped(
         RegExp(r'(\d)(?=(\d{3})+(?!\d))'),
         (match) => '${match[1]},',
       );
   return '$symbol $formatted';
 }
 
+String formatSignedCurrency(
+  double amount, {
+  required bool isNegative,
+  String currency = 'USD',
+}) {
+  final symbol = currencySymbol(currency);
+  final formatted = amount
+      .abs()
+      .toStringAsFixed(2)
+      .replaceAllMapped(
+        RegExp(r'(\d)(?=(\d{3})+(?!\d))'),
+        (match) => '${match[1]},',
+      );
+  final prefix = isNegative ? '-' : '';
+  return '$prefix$symbol$formatted';
+}
+
 String currencySymbol(String currency) {
   try {
-    return NumberFormat.simpleCurrency(name: currency.toUpperCase())
-        .currencySymbol;
+    return NumberFormat.simpleCurrency(
+      name: currency.toUpperCase(),
+    ).currencySymbol;
   } catch (_) {
     return currency.toUpperCase();
   }
@@ -82,6 +104,10 @@ String billingCycleLabel(String value) {
 
 String formatShortDate(DateTime date) {
   return DateFormat('MMM d, yyyy').format(date);
+}
+
+String formatMonthDay(DateTime date) {
+  return DateFormat('MMM d').format(date);
 }
 
 String formatDateTime(DateTime date) {
