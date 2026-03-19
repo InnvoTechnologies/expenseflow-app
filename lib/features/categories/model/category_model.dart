@@ -18,7 +18,7 @@ abstract class Category with _$Category {
     required CategoryType type,
     required String color,
     String? parentId,
-    required String userId,
+    String? userId,
     String? organizationId,
   }) = _Category;
 

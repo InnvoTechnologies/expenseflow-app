@@ -12,10 +12,9 @@ abstract class Payee with _$Payee {
     String? phone,
     String? address,
     String? description,
-    required String userId,
+    String? userId,
     String? organizationId,
   }) = _Payee;
 
   factory Payee.fromJson(Map<String, dynamic> json) => _$PayeeFromJson(json);
 }
-

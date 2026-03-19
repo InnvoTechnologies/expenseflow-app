@@ -396,11 +396,6 @@ class _AddEditSubscriptionPageState extends State<AddEditSubscriptionPage> {
                   },
                 ),
                 const SizedBox(height: 16),
-                Text(
-                  'Payment Account (optional)',
-                  style: theme.textTheme.labelMedium,
-                ),
-                const SizedBox(height: 8),
                 SelectionSheetField(
                   label: 'Payment Account (optional)',
                   valueText: effectiveAccountId == null

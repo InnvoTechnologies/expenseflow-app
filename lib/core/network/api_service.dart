@@ -722,14 +722,10 @@ class ApiService {
     required String lastName,
   }) async {
     try {
-      final response = await _networkClient.patch(
-        ApiEndpoints.profile,
-        {
-          'firstName': firstName,
-          'lastName': lastName,
-        },
-        headers: _buildOrganizationHeaders(),
-      );
+      final response = await _networkClient.patch(ApiEndpoints.profile, {
+        'firstName': firstName,
+        'lastName': lastName,
+      }, headers: _buildOrganizationHeaders());
       return Right(response);
     } on AppException catch (e) {
       return Left(ExceptionToFailureMapper.mapExceptionToFailure(e));

@@ -9,7 +9,7 @@ abstract class Tag with _$Tag {
     required String id,
     required String name,
     required String color,
-    required String userId,
+    String? userId,
     String? organizationId,
     required DateTime createdAt,
     required DateTime updatedAt,

@@ -11,7 +11,7 @@ abstract class Reminder with _$Reminder {
     String? description,
     required DateTime dueDate,
     required String status,
-    required String userId,
+    String? userId,
     String? organizationId,
     required DateTime createdAt,
     required DateTime updatedAt,

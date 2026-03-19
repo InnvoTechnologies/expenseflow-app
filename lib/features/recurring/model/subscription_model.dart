@@ -19,7 +19,7 @@ abstract class Subscription with _$Subscription {
     required bool reminderEnabled,
     required int notifyDaysBefore,
     required String status,
-    required String userId,
+    String? userId,
     String? organizationId,
     required DateTime createdAt,
     required DateTime updatedAt,

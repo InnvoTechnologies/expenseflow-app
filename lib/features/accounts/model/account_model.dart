@@ -13,7 +13,7 @@ abstract class Account with _$Account {
     required String type,
     required String currency,
     required double currentBalance,
-    required String userId,
+    String? userId,
     String? organizationId,
     required bool isDefault,
     required DateTime createdAt,
