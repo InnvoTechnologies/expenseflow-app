@@ -3,6 +3,9 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'transaction_model.freezed.dart';
 part 'transaction_model.g.dart';
 
+enum ApiTransactionType { income, expense, transfer, unknown }
+
+
 @freezed
 abstract class TransactionTagModel with _$TransactionTagModel {
   const factory TransactionTagModel({
@@ -71,10 +74,12 @@ abstract class TransactionModel with _$TransactionModel {
         ? feeRaw.toDouble()
         : double.tryParse(feeRaw.toString()) ?? 0.0;
 
-    final payeeId = json['payeeId']?.toString() ??
+    final payeeId =
+        json['payeeId']?.toString() ??
         (json['payee'] as Map<String, dynamic>?)?['id']?.toString();
 
-    final subscriptionId = json['subscriptionId']?.toString() ??
+    final subscriptionId =
+        json['subscriptionId']?.toString() ??
         (json['subscription'] as Map<String, dynamic>?)?['id']?.toString();
 
     final tagIds = (json['tagIds'] as List<dynamic>? ?? [])
@@ -82,9 +87,7 @@ abstract class TransactionModel with _$TransactionModel {
         .toList();
 
     final tags = (json['tags'] as List<dynamic>? ?? [])
-        .map(
-          (t) => TransactionTagModel.fromJson(t as Map<String, dynamic>),
-        )
+        .map((t) => TransactionTagModel.fromJson(t as Map<String, dynamic>))
         .toList();
 
     TransactionRelatedModel? parseRelated(dynamic value) {
@@ -118,3 +121,74 @@ abstract class TransactionModel with _$TransactionModel {
   }
 }
 
+
+class TransactionPaginationMetadata {
+  final int total;
+  final int page;
+  final int limit;
+  final int totalPages;
+
+  const TransactionPaginationMetadata({
+    required this.total,
+    required this.page,
+    required this.limit,
+    required this.totalPages,
+  });
+
+  factory TransactionPaginationMetadata.fromJson(
+    Map<String, dynamic>? json, {
+    int fallbackPage = 1,
+    int fallbackLimit = 20,
+  }) {
+    if (json == null) {
+      return TransactionPaginationMetadata(
+        total: 0,
+        page: fallbackPage,
+        limit: fallbackLimit,
+        totalPages: 1,
+      );
+    }
+
+    int asInt(dynamic value, int fallback) {
+      if (value is int) return value;
+      if (value is num) return value.toInt();
+      if (value is String) {
+        final parsed = int.tryParse(value);
+        if (parsed != null) return parsed;
+      }
+      return fallback;
+    }
+
+    final total = asInt(json['total'], 0);
+    final page = asInt(json['page'], fallbackPage);
+    final limit = asInt(json['limit'], fallbackLimit);
+    final totalPages = asInt(json['totalPages'], 1);
+
+    return TransactionPaginationMetadata(
+      total: total,
+      page: page,
+      limit: limit,
+      totalPages: totalPages,
+    );
+  }
+}
+
+extension ApiTransactionTypeX on ApiTransactionType {
+  static ApiTransactionType fromApi(String? value) {
+    switch ((value ?? '').toUpperCase()) {
+      case 'INCOME':
+        return ApiTransactionType.income;
+      case 'EXPENSE':
+        return ApiTransactionType.expense;
+      case 'TRANSFER':
+        return ApiTransactionType.transfer;
+      default:
+        return ApiTransactionType.unknown;
+    }
+  }
+}
+
+extension ApiTransactionTypeParsing on String {
+  ApiTransactionType toApiTransactionType() =>
+      ApiTransactionTypeX.fromApi(this);
+}

@@ -7,6 +7,10 @@ import 'dashboard_state.dart';
 class DashboardCubit extends Cubit<DashboardState> {
   DashboardCubit() : super(const DashboardInitial());
 
+  void reset() {
+    emit(const DashboardInitial());
+  }
+
   Future<void> loadForMonth(DateTime month) async {
     emit(const DashboardLoading());
 

@@ -7,11 +7,10 @@ import 'package:expenseflow/features/categories/view/categories_page.dart';
 import 'package:expenseflow/features/payees/payees_page.dart';
 import 'package:expenseflow/features/recurring/subscriptions_page.dart';
 import 'package:expenseflow/features/tags/view/tags_page.dart';
+import 'package:expenseflow/core/util/widgets/custom_refresh_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../domain/models/finance_account.dart';
-import '../../domain/models/transaction.dart' as domain;
 import 'cubit/dashboard_cubit.dart';
 import 'cubit/dashboard_state.dart';
 import 'model/dashboard_model.dart';
@@ -54,11 +53,15 @@ class _DashboardPageState extends State<DashboardPage> {
           final income = data?.monthlyIncome ?? 0.0;
           final expense = data?.monthlyExpense ?? 0.0;
 
-          return SingleChildScrollView(
-            padding: kDefaultPadding,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+          return CustomRefreshIndicator(
+            onRefresh: () =>
+                context.read<DashboardCubit>().loadForMonth(selectedDate),
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: kDefaultPadding,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                 const SizedBox(height: 8),
                 DashboardMonthSelector(
                   selectedDate: selectedDate,
@@ -164,14 +167,8 @@ class _DashboardPageState extends State<DashboardPage> {
                       return SizedBox(
                         width: 200,
                         child: AccountCard(
-                          account: FinanceAccount(
-                            id: account.id,
-                            name: account.name,
-                            type: FinanceAccountType.bank,
-                            currency: 'USD',
-                            currentBalance: account.currentBalance,
-                            userId: '',
-                          ),
+                          account: account,
+                          currency: 'USD',
                           onTap: () {
                             // Navigate to account details
                           },
@@ -297,30 +294,12 @@ class _DashboardPageState extends State<DashboardPage> {
                                 ),
                               ]
                             : data!.recentTransactions.map((t) {
-                                final date = t.date ?? DateTime.now();
-                                final type = t.type == 'INCOME'
-                                    ? domain.TransactionType.income
-                                    : t.type == 'EXPENSE'
-                                    ? domain.TransactionType.expense
-                                    : domain.TransactionType.transfer;
-
-                                final transaction = domain.Transaction(
-                                  id: t.id,
-                                  amount: t.amount,
-                                  type: type,
-                                  date: date,
-                                  description: t.description.isEmpty
-                                      ? 'Transaction'
-                                      : t.description,
-                                  accountId: '',
-                                  toAccountId: null,
-                                  categoryId: null,
-                                  payeeId: null,
-                                  status: '',
-                                );
-
                                 return TransactionItem(
-                                  transaction: transaction,
+                                  transaction: t.copyWith(
+                                    description: t.description.isEmpty
+                                        ? 'Transaction'
+                                        : t.description,
+                                  ),
                                   payee: null,
                                   onTap: () {
                                     // Navigate to transaction details
@@ -456,7 +435,8 @@ class _DashboardPageState extends State<DashboardPage> {
 
                 // Bottom padding
                 SizedBox(height: 24),
-              ],
+                ],
+              ),
             ),
           );
         },

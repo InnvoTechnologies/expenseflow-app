@@ -13,7 +13,7 @@ class TransactionFormModel extends ChangeNotifier {
     String? toAccountId,
     String? payeeId,
     String? subscriptionId,
-    String? tagId,
+    List<String> tagIds = const <String>[],
   })  : _amount = amount,
         _feeAmount = feeAmount,
         _description = description,
@@ -23,7 +23,7 @@ class TransactionFormModel extends ChangeNotifier {
         _toAccountId = toAccountId,
         _payeeId = payeeId,
         _subscriptionId = subscriptionId,
-        _tagId = tagId;
+        _tagIds = List<String>.from(tagIds);
 
   factory TransactionFormModel.fromTransaction(TransactionModel? tx) {
     if (tx == null) return TransactionFormModel();
@@ -37,7 +37,7 @@ class TransactionFormModel extends ChangeNotifier {
       toAccountId: tx.toAccountId,
       payeeId: tx.payeeId,
       subscriptionId: tx.subscriptionId,
-      tagId: tx.tagIds.isNotEmpty ? tx.tagIds.first : null,
+      tagIds: tx.tagIds,
     );
   }
 
@@ -50,7 +50,7 @@ class TransactionFormModel extends ChangeNotifier {
   String? _toAccountId;
   String? _payeeId;
   String? _subscriptionId;
-  String? _tagId;
+  List<String> _tagIds;
 
   String get amount => _amount;
   String get feeAmount => _feeAmount;
@@ -61,7 +61,7 @@ class TransactionFormModel extends ChangeNotifier {
   String? get toAccountId => _toAccountId;
   String? get payeeId => _payeeId;
   String? get subscriptionId => _subscriptionId;
-  String? get tagId => _tagId;
+  List<String> get tagIds => List<String>.unmodifiable(_tagIds);
 
   void setAmount(String value) {
     _amount = value;
@@ -108,8 +108,8 @@ class TransactionFormModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setTagId(String? value) {
-    _tagId = value;
+  void setTagIds(List<String> value) {
+    _tagIds = List<String>.from(value);
     notifyListeners();
   }
 }

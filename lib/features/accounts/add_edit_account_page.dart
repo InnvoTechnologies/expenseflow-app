@@ -6,6 +6,7 @@ import 'package:expenseflow/core/util/loading/show_loading_spinner.dart';
 import 'package:expenseflow/core/util/validators.dart';
 import 'package:expenseflow/core/util/widgets/app_bar.dart';
 import 'package:expenseflow/core/util/widgets/elevated_button.dart';
+import 'package:expenseflow/core/util/widgets/selection_sheet.dart';
 import 'package:expenseflow/core/util/widgets/text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -141,21 +142,31 @@ class _AddEditAccountPageState extends State<AddEditAccountPage> {
                   validator: Validators.required,
                 ),
                 const SizedBox(height: 24),
-                Text('Type', style: theme.textTheme.labelMedium),
-                const SizedBox(height: 8),
-                DropdownButtonFormField<String>(
-                  initialValue: _selectedType,
-                  items: Account.accountTypes
-                      .map(
-                        (t) => DropdownMenuItem<String>(
-                          value: t['value'],
-                          child: Text(t['label']!),
-                        ),
-                      )
-                      .toList(),
-                  onChanged: (value) {
-                    if (value == null) return;
-                    setState(() => _selectedType = value);
+                SelectionSheetField(
+                  label: 'Type',
+                  valueText: Account.accountTypes
+                      .firstWhere(
+                        (t) => t['value'] == _selectedType,
+                        orElse: () => const {'value': '', 'label': ''},
+                      )['label'],
+                  placeholder: 'Select type',
+                  onTap: () async {
+                    final items = Account.accountTypes
+                        .where((t) => (t['value'] ?? '').isNotEmpty)
+                        .toList();
+                    final selected = items.any((t) => t['value'] == _selectedType)
+                        ? items.firstWhere((t) => t['value'] == _selectedType)
+                        : null;
+                    final picked = await showSingleSelectSheet<
+                        Map<String, String>>(
+                      context: context,
+                      title: 'Select Account Type',
+                      items: items,
+                      selected: selected,
+                      labelOf: (m) => m['label'] ?? '',
+                    );
+                    if (picked == null) return;
+                    setState(() => _selectedType = picked['value'] ?? _selectedType);
                   },
                 ),
                 const SizedBox(height: 24),

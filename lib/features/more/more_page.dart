@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../core/util/widgets/app_bar.dart';
 import '../accounts/accounts_page.dart';
-import '../ai_assistant/chat_page.dart';
 import '../categories/view/categories_page.dart';
 import '../investments/investments_page.dart';
 import '../payees/payees_page.dart';
@@ -22,7 +21,6 @@ class MorePage extends StatelessWidget {
       _Item('Categories', Icons.category, () => const CategoriesPage()),
       _Item('Tags', Icons.label_outline, () => const TagsPage()),
       _Item('Payees', Icons.person_outline, () => const PayeesPage()),
-      _Item('AI Assistant', Icons.smart_toy_outlined, () => const ChatPage()),
       _Item('Reminders', Icons.alarm, () => const RemindersPage()),
       _Item('Subscriptions', Icons.repeat, () => const SubscriptionsPage()),
       _Item('Savings', Icons.savings, () => const SavingsPage()),

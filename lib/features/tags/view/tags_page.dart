@@ -1,6 +1,7 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'package:expenseflow/core/util/widgets/app_bar.dart';
+import 'package:expenseflow/core/util/widgets/custom_refresh_indicator.dart';
 import 'package:expenseflow/features/tags/cubit/tag_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -39,23 +40,25 @@ class _TagsPageState extends State<TagsPage> {
           ),
         ],
       ),
-      body: Padding(
-        padding: kDefaultPadding,
-        child: BlocBuilder<TagCubit, TagState>(
-          builder: (context, state) {
-            if (state is TagLoading) {
-              return const Center(child: PageLoadingSpinner());
-            }
+      body: BlocBuilder<TagCubit, TagState>(
+        builder: (context, state) {
+          if (state is TagLoading) {
+            return const Center(child: PageLoadingSpinner());
+          }
 
-            if (state is TagError) {
-              return Center(child: Text('Error: ${state.message}'));
-            }
+          if (state is TagError) {
+            return Center(child: Text('Error: ${state.message}'));
+          }
 
-            if (state.tags.isEmpty) {
-              return const Center(child: Text('No tags found.'));
-            }
+          if (state.tags.isEmpty) {
+            return const Center(child: Text('No tags found.'));
+          }
 
-            return ListView.builder(
+          return CustomRefreshIndicator(
+            onRefresh: () => context.read<TagCubit>().getTags(),
+            child: ListView.builder(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: kDefaultPadding,
               itemCount: state.tags.length,
               itemBuilder: (context, i) {
                 final Tag tag = state.tags[i];
@@ -83,9 +86,9 @@ class _TagsPageState extends State<TagsPage> {
                   ),
                 );
               },
-            );
-          },
-        ),
+            ),
+          );
+        },
       ),
     );
   }
