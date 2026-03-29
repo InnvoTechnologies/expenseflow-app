@@ -43,13 +43,16 @@ class _ChatPageState extends State<ChatPage> {
                     ),
                     decoration: BoxDecoration(
                       color: isUser
-                          ? Theme.of(context).colorScheme.primaryContainer
+                          ? Theme.of(context).primaryColor
                           : Theme.of(
                               context,
                             ).colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Text(m['text']!),
+                    child: Text(
+                      m['text']!,
+                      style: TextStyle(fontWeight: FontWeight.w600),
+                    ),
                   ),
                 );
               },
