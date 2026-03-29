@@ -1,11 +1,23 @@
 import 'package:expenseflow/core/util/const/constants.dart';
+import 'package:expenseflow/core/util/extensions.dart';
+import 'package:expenseflow/core/util/loading/page_loading_spinner.dart';
 import 'package:expenseflow/core/util/widgets/app_bar.dart';
+import 'package:expenseflow/features/accounts/accounts_page.dart';
+import 'package:expenseflow/features/categories/view/categories_page.dart';
+import 'package:expenseflow/features/payees/payees_page.dart';
+import 'package:expenseflow/features/recurring/subscriptions_page.dart';
+import 'package:expenseflow/features/tags/view/tags_page.dart';
+import 'package:expenseflow/core/util/widgets/custom_refresh_indicator.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../core/data/dummy_data.dart';
-import '../../domain/models/transaction.dart';
+import 'cubit/dashboard_cubit.dart';
+import 'cubit/dashboard_state.dart';
+import 'model/dashboard_model.dart';
 import 'widgets/account_card.dart';
-import 'widgets/payee_item.dart';
+import 'widgets/category_empty_state.dart';
+import 'widgets/month_selector.dart';
+import 'widgets/top_payee_tile.dart';
 import 'widgets/transaction_item.dart';
 
 class DashboardPage extends StatefulWidget {
@@ -20,315 +32,414 @@ class _DashboardPageState extends State<DashboardPage> {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    final totals = DummyData.monthlyTotals(selectedDate);
-    final recentTransactions = DummyData.transactions
-        .where(
-          (t) =>
-              t.date.year == selectedDate.year &&
-              t.date.month == selectedDate.month,
-        )
-        .take(5)
-        .toList();
-
-    // Calculate top payees
-    final payeeAmounts = <String, double>{};
-    for (final transaction in DummyData.transactions.where(
-      (t) =>
-          t.type == TransactionType.expense &&
-          t.payeeId != null &&
-          t.date.year == selectedDate.year &&
-          t.date.month == selectedDate.month,
-    )) {
-      payeeAmounts[transaction.payeeId!] =
-          (payeeAmounts[transaction.payeeId!] ?? 0) + transaction.amount;
-    }
-    final topPayees = payeeAmounts.entries.toList()
-      ..sort((a, b) => b.value.compareTo(a.value));
 
     return Scaffold(
-      appBar: AppBarWidget(
-        title: 'Dashboard',
-        isBack: false,
-        // actions: [_buildMonthSelector()],
-      ),
-      body: SingleChildScrollView(
-        padding: kDefaultPadding,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header Section
-            Text(
-              _getGreeting(),
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-                fontSize: 22,
-              ),
-            ),
-            SizedBox(height: 10),
+      appBar: AppBarWidget(title: 'Dashboard'),
+      body: BlocBuilder<DashboardCubit, DashboardState>(
+        builder: (context, state) {
+          if (state is DashboardInitial) {
+            context.read<DashboardCubit>().loadForMonth(selectedDate);
+            return const Center(child: PageLoadingSpinner());
+          }
+          if (state is DashboardLoading) {
+            return const Center(child: PageLoadingSpinner());
+          }
+          if (state is DashboardError) {
+            return Center(child: Text('Error: ${state.message}'));
+          }
 
-            // Financial Overview Cards
-            Padding(
-              padding: const EdgeInsets.all(0),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: _buildStatCard(
-                      context: context,
-                      label: 'Total Balance',
-                      value: _formatCurrency(totals['balance']!),
-                      subtext: 'Across all accounts',
-                      icon: Icons.account_balance_wallet_outlined,
-                      color: scheme.primary,
-                      isFullWidth: true,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(0),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: _buildStatCard(
-                      context: context,
-                      label: 'Income',
-                      value: _formatCurrency(totals['income']!),
-                      subtext:
-                          '${_getMonthName(selectedDate.month)} ${selectedDate.year}',
-                      icon: Icons.trending_up,
-                      color: scheme.primary,
-                    ),
-                  ),
-                  Expanded(
-                    child: _buildStatCard(
-                      context: context,
-                      label: 'Expense',
-                      value: _formatCurrency(totals['expense']!),
-                      subtext:
-                          '${_getMonthName(selectedDate.month)} ${selectedDate.year}',
-                      icon: Icons.trending_down,
-                      color: scheme.error,
-                      // isFullWidth: true,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            // Accounts Section
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Accounts',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-                ),
-                TextButton(
-                  onPressed: () {
-                    // Navigate to accounts page
-                  },
-                  child: const Text('View All'),
-                ),
-              ],
-            ),
+          final data = state is DashboardLoaded ? state.data : null;
+          final totalBalance = data?.totalBalance ?? 0.0;
+          final income = data?.monthlyIncome ?? 0.0;
+          final expense = data?.monthlyExpense ?? 0.0;
 
-            SizedBox(
-              height: 140,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 0),
-                itemCount: DummyData.accounts.length + 1,
-                itemBuilder: (context, index) {
-                  if (index == DummyData.accounts.length) {
-                    return _buildAddAccountCard(context);
-                  }
-                  return SizedBox(
-                    width: 200,
-                    child: AccountCard(
-                      account: DummyData.accounts[index],
-                      onTap: () {
-                        // Navigate to account details
-                      },
-                    ),
-                  );
-                },
-              ),
-            ),
-
-            // Recent Transactions Section
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Recent Transactions',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-                ),
-                IconButton(
-                  onPressed: () {
-                    // Navigate to add transaction
-                  },
-                  icon: const Icon(Icons.add_circle_outline),
-                  tooltip: 'Add Transaction',
-                ),
-              ],
-            ),
-
-            Card(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-                side: BorderSide(color: scheme.outlineVariant, width: 1),
-              ),
+          return CustomRefreshIndicator(
+            onRefresh: () =>
+                context.read<DashboardCubit>().loadForMonth(selectedDate),
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: kDefaultPadding,
               child: Column(
-                children: recentTransactions.isEmpty
-                    ? [
-                        Padding(
-                          padding: const EdgeInsets.all(32),
-                          child: Column(
-                            children: [
-                              Icon(
-                                Icons.receipt_long_outlined,
-                                size: 48,
-                                color: scheme.onSurfaceVariant,
-                              ),
-                              const SizedBox(height: 16),
-                              Text(
-                                'No transactions this month',
-                                style: Theme.of(context).textTheme.bodyLarge
-                                    ?.copyWith(color: scheme.onSurfaceVariant),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ]
-                    : recentTransactions.map((transaction) {
-                        final category = DummyData.categories.firstWhere(
-                          (c) => c.id == transaction.categoryId,
-                          orElse: () => DummyData.categories.first,
-                        );
-                        final payee = transaction.payeeId != null
-                            ? DummyData.payees.firstWhere(
-                                (p) => p.id == transaction.payeeId,
-                                orElse: () => DummyData.payees.first,
-                              )
-                            : null;
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                const SizedBox(height: 8),
+                DashboardMonthSelector(
+                  selectedDate: selectedDate,
+                  onChanged: (newDate) {
+                    setState(() => selectedDate = newDate);
+                    context.read<DashboardCubit>().loadForMonth(newDate);
+                  },
+                ),
+                const SizedBox(height: 16),
 
-                        return TransactionItem(
-                          transaction: transaction,
-                          category: category,
-                          payee: payee,
+                // Header Section
+                Text(
+                  _getGreeting(),
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20,
+                  ),
+                ),
+                SizedBox(height: 10),
+
+                Padding(
+                  padding: const EdgeInsets.all(0),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: _buildStatCard(
+                          context: context,
+                          label: 'Total Balance',
+                          value: _formatCurrency(totalBalance),
+                          subtext: 'Across all accounts',
+                          icon: Icons.account_balance_wallet_outlined,
+                          color: scheme.primary,
+                          isFullWidth: true,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(0),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: _buildStatCard(
+                          context: context,
+                          label: 'Income',
+                          value: _formatCurrency(income),
+                          subtext:
+                              '${getMonthName(selectedDate.month)} ${selectedDate.year}',
+                          icon: Icons.trending_up,
+                          color: scheme.primary,
+                        ),
+                      ),
+                      Expanded(
+                        child: _buildStatCard(
+                          context: context,
+                          label: 'Expense',
+                          value: _formatCurrency(expense),
+                          subtext:
+                              '${getMonthName(selectedDate.month)} ${selectedDate.year}',
+                          icon: Icons.trending_down,
+                          color: scheme.error,
+                          // isFullWidth: true,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Accounts',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => AccountsPage(),
+                          ),
+                        );
+                      },
+                      child: const Text('View All'),
+                    ),
+                  ],
+                ),
+
+                SizedBox(
+                  height: 140,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: 0),
+                    itemCount: (data?.accounts.length ?? 0) + 1,
+                    itemBuilder: (context, index) {
+                      final accounts = data?.accounts ?? [];
+                      if (index == accounts.length) {
+                        return _buildAddAccountCard(context);
+                      }
+                      final account = accounts[index];
+                      return SizedBox(
+                        width: 200,
+                        child: AccountCard(
+                          account: account,
+                          currency: 'USD',
                           onTap: () {
-                            // Navigate to transaction details
+                            // Navigate to account details
+                          },
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Income by Category',
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(fontWeight: FontWeight.bold),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => const CategoriesPage(),
+                              ),
+                            );
+                          },
+                          child: const Text('View All'),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    _buildCategoryCard(
+                      context: context,
+                      entries: data?.incomeByCategory ?? const [],
+                      valueColor: scheme.primary,
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Expenses by Category',
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(fontWeight: FontWeight.bold),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => const CategoriesPage(),
+                              ),
+                            );
+                          },
+                          child: const Text('View All'),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    _buildCategoryCard(
+                      context: context,
+                      entries: data?.expensesByCategory ?? const [],
+                      valueColor: scheme.error,
+                    ),
+                  ],
+                ),
+
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Recent Transactions',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () {
+                        // Navigate to add transaction
+                      },
+                      icon: const Icon(Icons.add_circle_outline),
+                      tooltip: 'Add Transaction',
+                    ),
+                  ],
+                ),
+
+                Align(
+                  alignment: Alignment.center,
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: Card(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        side: BorderSide(
+                          color: scheme.outlineVariant,
+                          width: 1,
+                        ),
+                      ),
+                      child: Column(
+                        children: (data?.recentTransactions.isEmpty ?? true)
+                            ? [
+                                Padding(
+                                  padding: const EdgeInsets.all(32),
+                                  child: Column(
+                                    children: [
+                                      Icon(
+                                        Icons.receipt_long_outlined,
+                                        size: 48,
+                                        color: scheme.onSurfaceVariant,
+                                      ),
+                                      const SizedBox(height: 16),
+                                      Text(
+                                        'No transactions this month',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyLarge
+                                            ?.copyWith(
+                                              color: scheme.onSurfaceVariant,
+                                            ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ]
+                            : data!.recentTransactions.map((t) {
+                                return TransactionItem(
+                                  transaction: t.copyWith(
+                                    description: t.description.isEmpty
+                                        ? 'Transaction'
+                                        : t.description,
+                                  ),
+                                  payee: null,
+                                  onTap: () {
+                                    // Navigate to transaction details
+                                  },
+                                );
+                              }).toList(),
+                      ),
+                    ),
+                  ),
+                ),
+                if ((data?.topTags.isNotEmpty ?? false))
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Top Tags',
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(fontWeight: FontWeight.bold),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => const TagsPage(),
+                            ),
+                          );
+                        },
+                        child: const Text('View All'),
+                      ),
+                    ],
+                  ),
+                if ((data?.topTags.isNotEmpty ?? false))
+                  Card(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      side: BorderSide(color: scheme.outlineVariant, width: 1),
+                    ),
+                    child: Column(
+                      children: data!.topTags.map((entry) {
+                        final color = entry.color != null
+                            ? convertColorStringToFlutterColor(entry.color!)
+                            : scheme.primaryContainer;
+                        return _BreakdownTile(
+                          label: entry.name,
+                          amount: entry.amount,
+                          color: color,
+                          valueColor: scheme.error,
+                        );
+                      }).toList(),
+                    ),
+                  ),
+
+                // Top Payees Section
+                if ((data?.topPayees.isNotEmpty ?? false))
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Top Payees',
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(fontWeight: FontWeight.bold),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => PayeesPage(),
+                            ),
+                          );
+                        },
+                        child: const Text('View All'),
+                      ),
+                    ],
+                  ),
+
+                if ((data?.topPayees.isNotEmpty ?? false))
+                  Card(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      side: BorderSide(color: scheme.outlineVariant, width: 1),
+                    ),
+                    child: Column(
+                      children: data!.topPayees.take(3).map((entry) {
+                        return TopPayeeTile(
+                          name: entry.name,
+                          amount: entry.amount,
+                          accentColor: scheme.primary,
+                          onTap: () {
+                            // Navigate to payee details
                           },
                         );
                       }).toList(),
-              ),
-            ),
-
-            // Top Payees Section
-            if (topPayees.isNotEmpty)
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Top Payees',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                  TextButton(
-                    onPressed: () {
-                      // Navigate to payees page
-                    },
-                    child: const Text('View All'),
+                if ((data?.topSubscriptions.isNotEmpty ?? false))
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Top Subscriptions',
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(fontWeight: FontWeight.bold),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => const SubscriptionsPage(),
+                            ),
+                          );
+                        },
+                        child: const Text('View All'),
+                      ),
+                    ],
                   ),
+                if ((data?.topSubscriptions.isNotEmpty ?? false))
+                  Card(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      side: BorderSide(color: scheme.outlineVariant, width: 1),
+                    ),
+                    child: Column(
+                      children: data!.topSubscriptions.take(5).map((s) {
+                        return _BreakdownTile(
+                          label: s.name,
+                          amount: s.amount,
+                          color: scheme.primaryContainer,
+                          valueColor: scheme.error,
+                        );
+                      }).toList(),
+                    ),
+                  ),
+
+                // Bottom padding
+                SizedBox(height: 24),
                 ],
               ),
-
-            if (topPayees.isNotEmpty)
-              Card(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  side: BorderSide(color: scheme.outlineVariant, width: 1),
-                ),
-                child: Column(
-                  children: topPayees.take(3).map((entry) {
-                    final payee = DummyData.payees.firstWhere(
-                      (p) => p.id == entry.key,
-                      orElse: () => DummyData.payees.first,
-                    );
-
-                    return PayeeItem(
-                      payee: payee,
-                      totalAmount: entry.value,
-                      onTap: () {
-                        // Navigate to payee details
-                      },
-                    );
-                  }).toList(),
-                ),
-              ),
-
-            // Bottom padding
-            SizedBox(height: 24),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildMonthSelector() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 6),
-      decoration: BoxDecoration(
-        border: Border.all(color: Theme.of(context).colorScheme.outline),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          IconButton(
-            icon: const Icon(Icons.chevron_left),
-            onPressed: () {
-              setState(() {
-                selectedDate = DateTime(
-                  selectedDate.year,
-                  selectedDate.month - 1,
-                  1,
-                );
-              });
-            },
-            iconSize: 20,
-            constraints: const BoxConstraints(),
-            padding: EdgeInsets.zero,
-          ),
-          const SizedBox(width: 8),
-          Text(
-            _getMonthYearString(selectedDate),
-            style: Theme.of(
-              context,
-            ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
-          ),
-          const SizedBox(width: 8),
-          IconButton(
-            icon: const Icon(Icons.chevron_right),
-            onPressed: () {
-              setState(() {
-                selectedDate = DateTime(
-                  selectedDate.year,
-                  selectedDate.month + 1,
-                  1,
-                );
-              });
-            },
-            iconSize: 20,
-            constraints: const BoxConstraints(),
-            padding: EdgeInsets.zero,
-          ),
-        ],
+            ),
+          );
+        },
       ),
     );
   }
@@ -408,7 +519,9 @@ class _DashboardPageState extends State<DashboardPage> {
         ),
         child: InkWell(
           onTap: () {
-            // Navigate to add account
+            Navigator.of(
+              context,
+            ).push(MaterialPageRoute(builder: (context) => AccountsPage()));
           },
           borderRadius: BorderRadius.circular(12),
           child: Column(
@@ -432,40 +545,111 @@ class _DashboardPageState extends State<DashboardPage> {
 
   String _getGreeting() {
     final hour = DateTime.now().hour;
-    final name = DummyData.user.name;
 
     if (hour < 12) {
-      return 'Good Morning, \n$name';
+      return 'Good Morning';
     } else if (hour < 17) {
-      return 'Good Afternoon, $name';
+      return 'Good Afternoon';
     } else {
-      return 'Good Evening, $name';
+      return 'Good Evening';
     }
   }
 
-  String _getMonthName(int month) {
-    const months = [
-      'January',
-      'February',
-      'March',
-      'April',
-      'May',
-      'June',
-      'July',
-      'August',
-      'September',
-      'October',
-      'November',
-      'December',
-    ];
-    return months[month - 1];
-  }
-
-  String _getMonthYearString(DateTime date) {
-    return '${_getMonthName(date.month)} ${date.year}';
-  }
-
   String _formatCurrency(double amount) {
-    return 'PKR\n${amount.toStringAsFixed(2).replaceAllMapped(RegExp(r'(\d)(?=(\d{3})+(?!\d))'), (match) => '${match[1]},')}';
+    return 'AUD\n${amount.toStringAsFixed(2).replaceAllMapped(RegExp(r'(\d)(?=(\d{3})+(?!\d))'), (match) => '${match[1]},')}';
+  }
+
+  Widget _buildCategoryCard({
+    required BuildContext context,
+    required List<DashboardNamedAmount> entries,
+    required Color valueColor,
+    Widget? action,
+  }) {
+    final scheme = Theme.of(context).colorScheme;
+    final total = entries.fold<double>(0, (p, e) => p + e.amount);
+    final isEmpty = entries.isEmpty || total == 0;
+    return SizedBox(
+      width: double.infinity,
+      child: Card(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: BorderSide(color: scheme.outlineVariant, width: 1),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(8),
+          child: Column(
+            children: [
+              if (action != null)
+                Align(alignment: Alignment.topRight, child: action),
+              if (isEmpty)
+                DashboardCategoryEmptyState(
+                  message: valueColor == scheme.primary
+                      ? 'No income data available'
+                      : 'No expense data available',
+                )
+              else
+                ...entries.take(5).map((e) {
+                  final color = e.color != null
+                      ? convertColorStringToFlutterColor(e.color!)
+                      : scheme.primaryContainer;
+                  final pct = total == 0 ? 0.0 : e.amount / total;
+                  return _BreakdownTile(
+                    label: e.name,
+                    amount: e.amount,
+                    color: color,
+                    valueColor: valueColor,
+                    percent: pct,
+                  );
+                }),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _BreakdownTile extends StatelessWidget {
+  final String label;
+  final double amount;
+  final Color color;
+  final Color valueColor;
+  final double? percent;
+  const _BreakdownTile({
+    required this.label,
+    required this.amount,
+    required this.color,
+    required this.valueColor,
+    this.percent,
+  });
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return ListTile(
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      leading: CircleAvatar(backgroundColor: color, radius: 14),
+      title: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label, maxLines: 1, overflow: TextOverflow.ellipsis),
+          if (percent != null) ...[
+            const SizedBox(height: 6),
+            LinearProgressIndicator(
+              value: percent!,
+              minHeight: 6,
+              color: valueColor,
+              backgroundColor: scheme.surfaceContainerHighest,
+            ),
+          ],
+        ],
+      ),
+      trailing: Text(
+        'AUD ${amount.toStringAsFixed(2).replaceAllMapped(RegExp(r'(\\d)(?=(\\d{3})+(?!\\d))'), (match) => '${match[1]},')}',
+        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+          fontWeight: FontWeight.w600,
+          color: valueColor,
+        ),
+      ),
+    );
   }
 }

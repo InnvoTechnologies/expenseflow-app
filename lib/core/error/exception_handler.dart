@@ -2,6 +2,9 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:expenseflow/core/util/const/constants.dart';
+import 'package:expenseflow/features/auth/bloc/auth_bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'exceptions.dart';
 
@@ -60,6 +63,8 @@ class ExceptionHandler {
     if (statusCode != null) {
       // Authentication errors
       if (statusCode == 401) {
+        _triggerForcedLogout();
+
         return AuthenticationException(
           message: errorMessage.isNotEmpty
               ? errorMessage
@@ -133,6 +138,17 @@ class ExceptionHandler {
       statusCode: statusCode,
       errorData: dioException.response?.data,
     );
+  }
+
+  static void _triggerForcedLogout() {
+    try {
+      final context = navigatorKey.currentContext;
+      if (context == null) return;
+
+      context.read<AuthBloc>().add(const Logout());
+    } catch (e, s) {
+      log('ExceptionHandler: Failed to trigger forced logout - $e', stackTrace: s);
+    }
   }
 
   /// Handles connection errors

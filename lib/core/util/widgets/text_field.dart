@@ -7,7 +7,7 @@ class CustomTextField extends StatefulWidget {
     super.key,
     required this.hintText,
     this.isPasswordField = false,
-    required this.controller,
+    this.controller,
     this.validator,
     this.autovalidateMode = AutovalidateMode.always,
     this.keyboardType,
@@ -19,7 +19,7 @@ class CustomTextField extends StatefulWidget {
     this.color,
     this.style,
     this.label,
-    this.maxlines,
+    this.maxlines = 1,
     this.minlines,
     this.radius,
     this.autofocus = false,
@@ -27,7 +27,7 @@ class CustomTextField extends StatefulWidget {
   });
   final String hintText;
   final bool isPasswordField;
-  final TextEditingController controller;
+  final TextEditingController? controller;
   final FormFieldValidator<String?>? validator;
   final AutovalidateMode autovalidateMode;
   final String? initialValue;
@@ -50,6 +50,29 @@ class CustomTextField extends StatefulWidget {
 
 class _CustomTextFieldState extends State<CustomTextField> {
   bool hidePassword = false;
+  late final TextEditingController _internalController;
+
+  TextEditingController get _controller =>
+      widget.controller ?? _internalController;
+
+  @override
+  void initState() {
+    super.initState();
+    _internalController = TextEditingController(
+      text: widget.initialValue ?? '',
+    );
+    if (widget.controller != null && widget.initialValue != null) {
+      widget.controller!.text = widget.initialValue!;
+    }
+  }
+
+  @override
+  void dispose() {
+    if (widget.controller == null) {
+      _internalController.dispose();
+    }
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -62,7 +85,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
           (widget.label != null)
               ? Text(
                   widget.label ?? '',
-                  style: const TextStyle(fontSize: 14),
+                  style: Theme.of(context).textTheme.labelMedium,
                 )
               : const SizedBox.shrink(),
           TextFormField(
@@ -74,9 +97,8 @@ class _CustomTextFieldState extends State<CustomTextField> {
             //   color: Colors.black,
             // ),
             enabled: widget.readOnly == true ? false : true,
-            style: Theme.of(context).textTheme.headlineSmall,
-            initialValue: widget.initialValue,
-            controller: widget.controller,
+            style: Theme.of(context).textTheme.bodyMedium,
+            controller: _controller,
             obscureText: hidePassword,
             validator: widget.validator,
             autofocus: widget.autofocus,
@@ -92,9 +114,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
                 right: 15,
               ),
               hintText: widget.hintText,
-              hintStyle:
-                  widget.style ??
-                  const TextStyle(fontSize: 12, color: Colors.grey),
+              hintStyle: widget.style ?? Theme.of(context).textTheme.bodyMedium,
               // border: InputBorder.none,
               border: const OutlineInputBorder(
                 borderRadius: BorderRadius.all(Radius.circular(10.0)),

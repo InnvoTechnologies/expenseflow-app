@@ -1,8 +1,23 @@
 import 'package:expenseflow/core/util/const/constants.dart';
 import 'package:expenseflow/core/util/widgets/app_bar.dart';
+import 'package:expenseflow/core/util/loading/page_loading_spinner.dart';
+import 'package:expenseflow/core/util/widgets/custom_refresh_indicator.dart';
+import 'package:expenseflow/features/accounts/cubit/account_cubit.dart';
+import 'package:expenseflow/features/categories/cubit/category_cubit.dart';
+import 'package:expenseflow/features/dashboard/cubit/dashboard_cubit.dart';
+import 'package:expenseflow/features/organization/cubit/organization_cubit.dart';
+import 'package:expenseflow/features/organization/cubit/organization_state.dart';
+import 'package:expenseflow/features/payees/cubit/payee_cubit.dart';
+import 'package:expenseflow/features/recurring/cubit/reminder_cubit.dart';
+import 'package:expenseflow/features/recurring/cubit/subscription_cubit.dart';
+import 'package:expenseflow/features/settings/settings_page.dart';
+import 'package:expenseflow/features/tags/cubit/tag_cubit.dart';
+import 'package:expenseflow/features/transactions/cubit/transactions_cubit.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../core/data/dummy_data.dart';
+import '../../core/util/widgets/icon_button.dart';
+import '../shell/shell_page.dart';
 
 class OrganizationPage extends StatefulWidget {
   const OrganizationPage({super.key});
@@ -11,117 +26,140 @@ class OrganizationPage extends StatefulWidget {
 }
 
 class _OrganizationPageState extends State<OrganizationPage> {
-  int selectedIndex = 0;
+  @override
+  void initState() {
+    super.initState();
+    context.read<OrganizationCubit>().fetchOrganizations();
+  }
+
+  void _refreshOrgScopedData(BuildContext context) {
+    context.read<DashboardCubit>().reset();
+    context.read<TransactionsCubit>().fetchTransactions();
+    context.read<AccountCubit>().getAccounts();
+    context.read<CategoryCubit>().getCategories();
+    context.read<TagCubit>().getTags();
+    context.read<PayeeCubit>().getPayees();
+    context.read<SubscriptionCubit>().getSubscriptions();
+    context.read<ReminderCubit>().getReminders();
+  }
+
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final textTheme = theme.textTheme;
+
     return Scaffold(
-      appBar: AppBarWidget(title: 'Organization'),
-      body: ListView(
-        padding: kDefaultPadding,
-        children: [
-          Text('Workspaces', style: Theme.of(context).textTheme.titleMedium),
-          const SizedBox(height: 8),
-          ...List.generate(DummyData.organizations.length, (i) {
-            final o = DummyData.organizations[i];
-            final selected = selectedIndex == i;
-            return Card(
-              child: ListTile(
-                leading: const Icon(Icons.business),
-                title: Text(o.name),
-                subtitle: Text(o.slug),
-                trailing: selected
-                    ? const Icon(Icons.check_circle, color: Colors.green)
-                    : null,
-                onTap: () => setState(() => selectedIndex = i),
-              ),
-            );
-          }),
-          const SizedBox(height: 16),
-          FilledButton.icon(
-            onPressed: _createOrg,
-            icon: const Icon(Icons.add),
-            label: const Text('Create Organization'),
+      appBar: AppBarWidget(
+        title: 'ExpenseFlow',
+        isBack: false,
+        actions: [
+          IconButtonWidget(
+            icon: Icons.settings,
+            onPressed: () async {
+              // context.read<AuthBloc>().add(Logout());
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (context) => const SettingsPage()),
+              );
+            },
           ),
-          const SizedBox(height: 24),
-          Text('Members', style: Theme.of(context).textTheme.titleMedium),
-          const SizedBox(height: 8),
-          ...DummyData.members
-              .where(
-                (m) =>
-                    m.organizationId ==
-                    DummyData.organizations[selectedIndex].id,
-              )
-              .map(
-                (m) => Card(
+        ],
+      ),
+      body: BlocBuilder<OrganizationCubit, OrganizationState>(
+        builder: (context, state) {
+          return CustomRefreshIndicator(
+            onRefresh: () => context.read<OrganizationCubit>().fetchOrganizations(),
+            child: ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: kDefaultPadding,
+              children: [
+                Card(
                   child: ListTile(
-                    leading: const Icon(Icons.person),
-                    title: Text(m.userId),
-                    subtitle: Text('${m.role} • ${m.status}'),
-                    trailing: PopupMenuButton<String>(
-                      onSelected: (v) {},
-                      itemBuilder: (context) => const [
-                        PopupMenuItem(value: 'remove', child: Text('Remove')),
-                      ],
+                    onTap: () {
+                      context.read<OrganizationCubit>().selectOrganization(null);
+                      _refreshOrgScopedData(context);
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const ShellPage(),
+                        ),
+                      );
+                    },
+                    leading: CircleAvatar(
+                      backgroundColor:
+                          colorScheme.primary.withValues(alpha: 0.15),
+                      child: Icon(
+                        Icons.person,
+                        color: colorScheme.primary,
+                      ),
+                    ),
+                    title: Text(
+                      'Personal',
+                      style: textTheme.titleMedium,
                     ),
                   ),
                 ),
-              ),
-          const SizedBox(height: 16),
-          FilledButton.icon(
-            onPressed: _inviteMember,
-            icon: const Icon(Icons.mail_outline),
-            label: const Text('Invite Member'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _createOrg() async {
-    final nameController = TextEditingController();
-    await showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Create Organization'),
-        content: TextField(
-          controller: nameController,
-          decoration: const InputDecoration(labelText: 'Name'),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Create'),
-          ),
-        ],
-      ),
-    );
-    setState(() {});
-  }
-
-  void _inviteMember() async {
-    final emailController = TextEditingController();
-    await showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Invite Member'),
-        content: TextField(
-          controller: emailController,
-          decoration: const InputDecoration(labelText: 'Email'),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Send Invite'),
-          ),
-        ],
+                const SizedBox(height: 16),
+                Text(
+                  'Organizations',
+                  style: textTheme.titleMedium,
+                ),
+                const SizedBox(height: 8),
+                if (state is OrganizationLoading)
+                  const Center(child: PageLoadingSpinner())
+                else if (state is OrganizationError)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    child: Text(
+                      state.message,
+                      style: textTheme.bodyMedium?.copyWith(
+                        color: colorScheme.error,
+                      ),
+                    ),
+                  )
+                else if (state is OrganizationLoaded &&
+                    state.organizations.isEmpty)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    child: Text(
+                      'No organizations found',
+                      style: textTheme.bodyMedium,
+                    ),
+                  )
+                else if (state is OrganizationLoaded)
+                  ...state.organizations.map(
+                    (org) => Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: Card(
+                        child: ListTile(
+                          onTap: () {
+                            context
+                                .read<OrganizationCubit>()
+                                .selectOrganization(org);
+                            _refreshOrgScopedData(context);
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => const ShellPage(),
+                              ),
+                            );
+                          },
+                          leading: CircleAvatar(
+                            backgroundColor:
+                                colorScheme.surfaceContainerHighest,
+                            child: Icon(
+                              Icons.business,
+                              color: colorScheme.onSurface,
+                            ),
+                          ),
+                          title: Text(org.name),
+                          subtitle: Text(org.slug),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }

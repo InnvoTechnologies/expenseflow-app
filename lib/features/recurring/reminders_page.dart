@@ -1,117 +1,180 @@
+import 'package:expenseflow/core/util/const/constants.dart';
+import 'package:expenseflow/core/util/loading/page_loading_spinner.dart';
+import 'package:expenseflow/core/util/loading/show_loading_spinner.dart';
 import 'package:expenseflow/core/util/widgets/app_bar.dart';
+import 'package:expenseflow/core/util/widgets/custom_refresh_indicator.dart';
+import 'package:expenseflow/core/util/widgets/dialogs.dart';
 import 'package:expenseflow/core/util/widgets/tab_bar.dart';
+import 'package:expenseflow/features/recurring/add_edit_reminder_page.dart';
+import 'package:expenseflow/features/recurring/cubit/reminder_cubit.dart';
+import 'package:expenseflow/features/recurring/cubit/reminder_state.dart';
+import 'package:expenseflow/features/recurring/model/reminder_model.dart';
+import 'package:expenseflow/features/recurring/widgets/reminder_card.dart';
+import 'package:expenseflow/features/recurring/widgets/reminder_empty_state.dart';
 import 'package:flutter/material.dart';
-
-import '../../core/data/dummy_data.dart';
-import '../../domain/models/reminder.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class RemindersPage extends StatefulWidget {
   const RemindersPage({super.key});
+
   @override
   State<RemindersPage> createState() => _RemindersPageState();
 }
 
 class _RemindersPageState extends State<RemindersPage> {
-  int filter = 0;
+  int _filter = 0;
+
+  List<Reminder> _filteredReminders(List<Reminder> reminders) {
+    switch (_filter) {
+      case 0:
+        return reminders;
+      case 1:
+        return reminders.where((r) => r.status.toUpperCase() == 'PENDING').toList();
+      case 2:
+        return reminders.where((r) => r.status.toUpperCase() == 'COMPLETED').toList();
+      case 3:
+        return reminders.where((r) => r.status.toUpperCase() == 'SKIPPED').toList();
+      default:
+        return reminders;
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    context.read<ReminderCubit>().getReminders();
+  }
+
   @override
   Widget build(BuildContext context) {
-    final items = DummyData.reminders.where((r) {
-      if (filter == 0) return true;
-      if (filter == 1) return r.status == ReminderStatus.pending;
-      if (filter == 2) return r.status == ReminderStatus.completed;
-      return r.status == ReminderStatus.skipped;
-    }).toList();
     return Scaffold(
       appBar: AppBarWidget(
         title: 'Reminders',
         actions: [
-          IconButton(onPressed: _addReminder, icon: const Icon(Icons.add)),
+          IconButton(
+            onPressed: _addReminder,
+            icon: const Icon(Icons.add),
+          ),
         ],
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          TabBarWidget(
-            onChanged: (s) => setState(() => filter = s),
-            items: [
-              Tab(text: 'All'),
-              Tab(text: 'Pending'),
-              Tab(text: 'Completed'),
-              Tab(text: 'Skipped'),
-            ],
-          ),
+      body: BlocBuilder<ReminderCubit, ReminderState>(
+        builder: (context, state) {
+          if (state is ReminderInitial || state is ReminderLoading) {
+            return const Center(child: PageLoadingSpinner());
+          }
 
-          const SizedBox(height: 8),
-          ...items.map(
-            (r) => Card(
-              child: ListTile(
-                leading: const Icon(Icons.alarm),
-                title: Text(r.title),
-                subtitle: Text(
-                  '${r.status.name.toUpperCase()} • ${r.dueDate.year}-${r.dueDate.month.toString().padLeft(2, '0')}-${r.dueDate.day.toString().padLeft(2, '0')}',
-                ),
-                trailing: PopupMenuButton<String>(
-                  onSelected: (v) => setState(() {
-                    final idx = DummyData.reminders.indexWhere(
-                      (x) => x.id == r.id,
-                    );
-                    if (v == 'complete')
-                      DummyData.reminders[idx] = Reminder(
-                        id: r.id,
-                        title: r.title,
-                        description: r.description,
-                        dueDate: r.dueDate,
-                        status: ReminderStatus.completed,
-                        userId: r.userId,
-                      );
-                    if (v == 'skip')
-                      DummyData.reminders[idx] = Reminder(
-                        id: r.id,
-                        title: r.title,
-                        description: r.description,
-                        dueDate: r.dueDate,
-                        status: ReminderStatus.skipped,
-                        userId: r.userId,
-                      );
-                  }),
-                  itemBuilder: (context) => const [
-                    PopupMenuItem(
-                      value: 'complete',
-                      child: Text('Mark Completed'),
+          if (state is ReminderError) {
+            return Center(
+              child: Text('Error: ${state.message}'),
+            );
+          }
+
+          final reminders =
+              (state as ReminderLoaded).reminders;
+          final filtered = _filteredReminders(reminders);
+
+          return CustomRefreshIndicator(
+            onRefresh: () => context.read<ReminderCubit>().getReminders(),
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  TabBarWidget(
+                    selectedIndex: _filter,
+                    onChanged: (s) => setState(() => _filter = s),
+                    items: const [
+                      Tab(text: 'All'),
+                      Tab(text: 'Pending'),
+                      Tab(text: 'Completed'),
+                      Tab(text: 'Skipped'),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  if (filtered.isEmpty)
+                    ReminderEmptyState(onAddReminder: _addReminder)
+                  else
+                    ...filtered.map<Widget>(
+                      (Reminder r) => Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: ReminderCard(
+                          reminder: r,
+                          onComplete: () => _markComplete(r),
+                          onSkip: () => _markSkipped(r),
+                          onEdit: () => _editReminder(r),
+                          onDelete: () => _deleteReminder(r),
+                        ),
+                      ),
                     ),
-                    PopupMenuItem(value: 'skip', child: Text('Mark Skipped')),
-                  ],
-                ),
+                ],
               ),
             ),
-          ),
-        ],
+          );
+        },
       ),
     );
   }
 
-  void _addReminder() async {
-    final controller = TextEditingController();
-    await showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('New Reminder'),
-        content: TextField(
-          controller: controller,
-          decoration: const InputDecoration(labelText: 'Title'),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Create'),
-          ),
-        ],
+  void _addReminder() {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => const AddEditReminderPage(),
       ),
     );
-    setState(() {});
+  }
+
+  Future<void> _markComplete(Reminder r) async {
+    showLoadingSpinner(context);
+    final success =
+        await context.read<ReminderCubit>().updateReminderStatus(r, 'COMPLETED');
+    Navigator.of(context).pop();
+    if (success) {
+      showSuccessSnackbar('Reminder marked as complete');
+    } else {
+      showFailedSnackbar('Failed to update reminder');
+    }
+  }
+
+  Future<void> _markSkipped(Reminder r) async {
+    showLoadingSpinner(context);
+    final success =
+        await context.read<ReminderCubit>().updateReminderStatus(r, 'SKIPPED');
+    Navigator.of(context).pop();
+    if (success) {
+      showSuccessSnackbar('Reminder skipped');
+    } else {
+      showFailedSnackbar('Failed to update reminder');
+    }
+  }
+
+  void _editReminder(Reminder r) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => AddEditReminderPage(reminder: r),
+      ),
+    );
+  }
+
+  Future<void> _deleteReminder(Reminder r) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => ConfirmDeleteDialog(
+        title: 'Delete Reminder',
+        message: 'Are you sure you want to delete "${r.title}"?',
+      ),
+    );
+
+    if (confirmed != true) return;
+
+    showLoadingSpinner(context);
+    final success = await context.read<ReminderCubit>().deleteReminder(r.id);
+    Navigator.of(context).pop();
+
+    if (success) {
+      showSuccessSnackbar('Reminder deleted successfully');
+    } else {
+      showFailedSnackbar('Failed to delete reminder');
+    }
   }
 }

@@ -1,7 +1,13 @@
+// ignore_for_file: use_build_context_synchronously
+
+import 'package:expenseflow/features/auth/bloc/auth_bloc.dart';
+import 'package:expenseflow/features/organization/organization_page.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../auth/view/login_page.dart';
+import '../shell/shell_page.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -46,7 +52,13 @@ class _SplashPageState extends State<SplashPage>
 
   Future<void> _navigateToLogin() async {
     await Future.delayed(const Duration(seconds: 1));
-
+    final authBloc = context.read<AuthBloc>();
+    if (authBloc.state.token.isNotEmpty) {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => const OrganizationPage()),
+      );
+      return;
+    }
     if (mounted) {
       Navigator.of(context).pushReplacement(
         PageRouteBuilder(

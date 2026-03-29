@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../domain/models/payee.dart';
+import '../../payees/model/payee_model.dart';
 
 class PayeeItem extends StatelessWidget {
   final Payee payee;
@@ -68,7 +68,7 @@ class PayeeItem extends StatelessWidget {
   }
 
   String _formatAmount() {
-    return 'PKR ${totalAmount.toStringAsFixed(2).replaceAllMapped(
+    return 'AUD ${totalAmount.toStringAsFixed(2).replaceAllMapped(
           RegExp(r'(\d)(?=(\d{3})+(?!\d))'),
           (match) => '${match[1]},',
         )}';
