@@ -1,8 +1,5 @@
 <!-- # ExpenseFlow | Financial Clarity. Engineered for Precision. -->
-
-<p align="center">
-  <img src="assets/logo-light.svg" alt="ExpenseFlow Logo" width="200"/>
-</p>
+![logo](https://www.expenseflow.co/banner.png)
 
 [**ExpenseFlow**](https://app.expenseflow.co) is a multi-currency expense manager engineered with AI insights and beautiful visualizations. Track, understand, and optimize your money — without the complexity.
 
@@ -13,14 +10,9 @@
 
 ## 📱 App Screenshots
 
-<p align="center">
-  <!-- TODO: Replace with actual app screenshots -->
-  <img src="https://via.placeholder.com/250x500.png?text=Dashboard+Screenshot" alt="Dashboard" width="250"/>
-  &nbsp;&nbsp;&nbsp;
-  <img src="https://via.placeholder.com/250x500.png?text=AI+Copilot+Screenshot" alt="AI Copilot" width="250"/>
-  &nbsp;&nbsp;&nbsp;
-  <img src="https://via.placeholder.com/250x500.png?text=Analytics+Screenshot" alt="Analytics" width="250"/>
-</p>
+<img width="3840" height="2160" alt="slide-01" src="https://github.com/user-attachments/assets/7de2aca7-3ee5-4242-8d21-2a214e8aa342" />
+<img width="3840" height="2160" alt="slide-02" src="https://github.com/user-attachments/assets/041c67d0-243e-4d52-9a30-14523340757a" />
+<img width="3840" height="2160" alt="slide-03" src="https://github.com/user-attachments/assets/59a91858-a15c-4f44-887f-daed1866e44f" />
 
 ---
 
@@ -95,4 +87,4 @@ Contributions are what make the open source community such an amazing place to b
 
 ## 🔗 Links
 - [ExpenseFlow Website](https://expenseflow.co)
-- [LinkedIn](https://www.linkedin.com/company/innvo-technologies)
+- [Github](https://www.github.com/muhammadtalhasultan)
