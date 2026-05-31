@@ -13,6 +13,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'cubit/dashboard_cubit.dart';
 import 'cubit/dashboard_state.dart';
+import '../../core/services/widget_sync_service.dart';
 import 'model/dashboard_model.dart';
 import 'widgets/account_card.dart';
 import 'widgets/category_empty_state.dart';
@@ -35,20 +36,26 @@ class _DashboardPageState extends State<DashboardPage> {
 
     return Scaffold(
       appBar: AppBarWidget(title: 'Dashboard'),
-      body: BlocBuilder<DashboardCubit, DashboardState>(
-        builder: (context, state) {
-          if (state is DashboardInitial) {
-            context.read<DashboardCubit>().loadForMonth(selectedDate);
-            return const Center(child: PageLoadingSpinner());
+      body: BlocListener<DashboardCubit, DashboardState>(
+        listener: (context, state) {
+          if (state is DashboardLoaded) {
+            WidgetSyncService.sync(context);
           }
-          if (state is DashboardLoading) {
-            return const Center(child: PageLoadingSpinner());
-          }
-          if (state is DashboardError) {
-            return Center(child: Text('Error: ${state.message}'));
-          }
+        },
+        child: BlocBuilder<DashboardCubit, DashboardState>(
+          builder: (context, state) {
+            if (state is DashboardInitial) {
+              context.read<DashboardCubit>().loadForMonth(selectedDate);
+              return const Center(child: PageLoadingSpinner());
+            }
+            if (state is DashboardLoading) {
+              return const Center(child: PageLoadingSpinner());
+            }
+            if (state is DashboardError) {
+              return Center(child: Text('Error: ${state.message}'));
+            }
 
-          final data = state is DashboardLoaded ? state.data : null;
+            final data = state is DashboardLoaded ? state.data : null;
           final totalBalance = data?.totalBalance ?? 0.0;
           final income = data?.monthlyIncome ?? 0.0;
           final expense = data?.monthlyExpense ?? 0.0;
@@ -441,8 +448,9 @@ class _DashboardPageState extends State<DashboardPage> {
           );
         },
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildStatCard({
     required BuildContext context,

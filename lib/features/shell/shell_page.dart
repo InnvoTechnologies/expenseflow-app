@@ -5,6 +5,7 @@ import '../dashboard/dashboard_page.dart';
 import '../more/more_page.dart';
 import '../transactions/add_edit_transaction_page.dart';
 import '../transactions/transactions_page.dart';
+import '../../core/services/shortcut_service.dart';
 
 class ShellPage extends StatefulWidget {
   const ShellPage({super.key});
@@ -20,6 +21,34 @@ class _ShellPageState extends State<ShellPage> {
     ChatPage(),
     MorePage(),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    ShortcutService.instance.registerListener(_handleShortcutAction);
+  }
+
+  @override
+  void dispose() {
+    ShortcutService.instance.unregisterListener();
+    super.dispose();
+  }
+
+  void _handleShortcutAction(String actionType) {
+    int initialTab = 0;
+    if (actionType.contains('income')) {
+      initialTab = 1;
+    } else if (actionType.contains('transfer')) {
+      initialTab = 2;
+    }
+
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => AddEditTransactionPage(initialSelectedTab: initialTab),
+        fullscreenDialog: true,
+      ),
+    );
+  }
   @override
   Widget build(BuildContext context) {
     final navigationIndex = index >= 2 ? index + 1 : index;

@@ -31,9 +31,14 @@ import 'widgets/transaction_amount_fee_row.dart';
 import 'widgets/transfer_transaction_section.dart';
 
 class AddEditTransactionPage extends StatefulWidget {
-  const AddEditTransactionPage({super.key, this.transaction});
+  const AddEditTransactionPage({
+    super.key,
+    this.transaction,
+    this.initialSelectedTab,
+  });
 
   final TransactionModel? transaction;
+  final int? initialSelectedTab;
 
   @override
   State<AddEditTransactionPage> createState() => _AddEditTransactionPageState();
@@ -61,6 +66,8 @@ class _AddEditTransactionPageState extends State<AddEditTransactionPage> {
       } else {
         _selectedTab = 0;
       }
+    } else if (widget.initialSelectedTab != null) {
+      _selectedTab = widget.initialSelectedTab!;
     }
 
     _form.addListener(_onFormChanged);
