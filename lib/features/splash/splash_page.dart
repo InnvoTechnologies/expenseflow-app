@@ -7,7 +7,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../auth/view/login_page.dart';
-import '../shell/shell_page.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});

@@ -18,6 +18,7 @@ import 'features/tags/cubit/tag_cubit.dart';
 import 'features/splash/splash_page.dart';
 import 'features/organization/cubit/organization_cubit.dart';
 import 'features/transactions/cubit/transactions_cubit.dart';
+import 'core/services/shortcut_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -29,6 +30,7 @@ void main() async {
     ),
   );
   ApiService().initApiService();
+  ShortcutService.instance.init();
   runApp(const ExpenseFlowApp());
 }
 
